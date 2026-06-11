@@ -12,6 +12,7 @@ async function serviceJson(url) {
 
 function classifyFailure(lines) {
   const joined = lines.join("\n").toLowerCase();
+  if (joined.includes("sonar") && (joined.includes("token") || joined.includes("unauthorized") || joined.includes("not authorized") || joined.includes("authentication") || joined.includes("401"))) return "SonarQube token/authentication issue";
   if (joined.includes("aadsts") || joined.includes("azure/login") || joined.includes("az login") || joined.includes("authenticate interactively")) return "permission/authentication issue";
   if (joined.includes("npm err") || joined.includes("package-lock") || joined.includes("dependency") || joined.includes("pip install")) return "dependency issue";
   if (joined.includes("test failed") || joined.includes("expected") || joined.includes("assertion") || joined.includes("jest")) return "test failure";

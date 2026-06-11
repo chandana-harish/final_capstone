@@ -53,6 +53,18 @@ function normalizeRecommendation(value) {
 function evidenceBasedFallback(payload, error) {
   const evidence = `${payload.errorSummary}\n${payload.importantLogLines.join("\n")}`.toLowerCase();
 
+  if (evidence.includes("sonar") && (evidence.includes("token") || evidence.includes("unauthorized") || evidence.includes("not authorized") || evidence.includes("authentication") || evidence.includes("401"))) {
+    return {
+      failureReason: "SonarQube authentication failed",
+      explanation: "The workflow failed while running SonarQube analysis. The log evidence points to a missing, invalid, or unauthorized SonarQube token.",
+      possibleRootCause: "The GitHub secret used for the SonarQube token is missing, expired, incorrect, or does not have permission for this SonarQube project.",
+      suggestedFix: "Verify the SonarQube token secret in GitHub Actions, commonly SONAR_TOKEN. Regenerate the token in SonarQube if needed, update the GitHub repository secret, and confirm the workflow references the same secret name.",
+      riskScore: 82,
+      confidenceLevel: "high",
+      insufficientEvidence: false
+    };
+  }
+
   if (evidence.includes("aadsts700016") || evidence.includes("application with identifier") || evidence.includes("azure/login")) {
     return {
       failureReason: "Azure login failed in GitHub Actions",
@@ -78,10 +90,10 @@ function evidenceBasedFallback(payload, error) {
   }
 
   return {
-    failureReason: "Gemini analysis unavailable",
-    explanation: "PipelineIQ detected the failed workflow and extracted error evidence, but Gemini could not complete the recommendation.",
+    failureReason: "AI analysis unavailable",
+    explanation: "PipelineIQ detected the failed workflow, but Gemini could not run because the AI service is not configured correctly.",
     possibleRootCause: payload.category || "Unknown",
-    suggestedFix: `Check gemini-ai-service logs for: ${error.message}. Then verify GEMINI_API_KEY and GEMINI_MODEL, and rerun the failed pipeline.`,
+    suggestedFix: `Fix the PipelineIQ Gemini configuration first: ${error.message}. After GEMINI_API_KEY and GEMINI_MODEL are correct, rerun this pipeline so Gemini can analyze the actual failure evidence.`,
     riskScore: 50,
     confidenceLevel: "low",
     insufficientEvidence: true

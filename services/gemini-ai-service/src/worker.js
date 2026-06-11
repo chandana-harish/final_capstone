@@ -101,26 +101,40 @@ function evidenceBasedFallback(payload, error) {
 }
 
 async function callGemini(prompt) {
-  const model = optionalEnv("GEMINI_MODEL", "gemini-1.5-pro");
-  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${requireEnv("GEMINI_API_KEY")}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      contents: [{ role: "user", parts: [{ text: prompt }] }],
-      generationConfig: {
-        temperature: 0.2,
-        responseMimeType: "application/json"
-      }
-    })
-  });
+  const configuredModel = optionalEnv("GEMINI_MODEL", "gemini-2.0-flash");
+  const models = [...new Set([configuredModel, "gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro-latest"])];
+  let lastError;
 
-  const body = await response.json();
-  if (!response.ok) {
-    throw new Error(body.error?.message || "Gemini API request failed");
+  for (const model of models) {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${requireEnv("GEMINI_API_KEY")}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [{ role: "user", parts: [{ text: prompt }] }],
+        generationConfig: {
+          temperature: 0.2,
+          responseMimeType: "application/json"
+        }
+      })
+    });
+
+    const body = await response.json();
+    if (!response.ok) {
+      lastError = new Error(`${model}: ${body.error?.message || "Gemini API request failed"}`);
+      console.error("Gemini model attempt failed", lastError.message);
+      continue;
+    }
+
+    const text = body.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!text) {
+      lastError = new Error(`${model}: Gemini response did not include text content`);
+      continue;
+    }
+
+    return normalizeRecommendation(parseJsonResponse(text));
   }
-  const text = body.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (!text) throw new Error("Gemini response did not include text content");
-  return normalizeRecommendation(parseJsonResponse(text));
+
+  throw lastError || new Error("Gemini API request failed for all configured models");
 }
 
 async function analyzeWithGemini(payload) {

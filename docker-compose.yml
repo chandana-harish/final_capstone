@@ -103,8 +103,8 @@ services:
       context: .
       dockerfile: frontend/Dockerfile
       args:
-        VITE_API_BASE_URL: http://localhost:8080
-        VITE_AUTH_BASE_URL: http://localhost:8081
+        VITE_API_BASE_URL: ${PUBLIC_API_BASE_URL}
+        VITE_AUTH_BASE_URL: ${PUBLIC_AUTH_BASE_URL}
     ports:
       - "5173:80"
     depends_on:
@@ -113,4 +113,3 @@ services:
 
 volumes:
   postgres-data:
-

@@ -174,8 +174,8 @@ function App() {
       <header className="topbar">
         <div>
           <p className="eyebrow">PipelineIQ</p>
-          <h1>GitHub Actions Runner</h1>
-          <p className="page-subtitle">Run selected workflows, monitor status, and analyze failed jobs with Gemini.</p>
+          <h1>AI Powered Pipeline Intelligence</h1>
+          <p className="page-subtitle">Launch workflows, track failures, and turn broken runs into clear fixes.</p>
         </div>
         <div className="user-strip">
           {user.avatar_url && <img src={user.avatar_url} alt="" />}

@@ -1,7 +1,7 @@
 :root {
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  color: #16212d;
-  background: #f3f7f8;
+  color: #172033;
+  background: #eef4f7;
 }
 
 * {
@@ -23,7 +23,7 @@ select {
   place-items: center;
   padding: 28px;
   background:
-    linear-gradient(115deg, rgba(11, 39, 48, 0.84), rgba(20, 89, 76, 0.68)),
+    linear-gradient(115deg, rgba(13, 31, 58, 0.84), rgba(11, 119, 111, 0.7)),
     url("https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1800&q=80");
   background-size: cover;
   background-position: center;
@@ -56,11 +56,11 @@ select {
   font-weight: 900;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: #1b7d6a;
+  color: #0d8f83;
 }
 
 .login-panel .eyebrow {
-  color: #9ff3dc;
+  color: #a7fff0;
 }
 
 .primary-action,
@@ -79,9 +79,9 @@ select {
 
 .primary-action {
   width: 100%;
-  background: #16866f;
+  background: #0d8f83;
   color: white;
-  box-shadow: 0 10px 24px rgba(22, 134, 111, 0.22);
+  box-shadow: 0 10px 24px rgba(13, 143, 131, 0.24);
 }
 
 .login-panel .primary-action {
@@ -92,7 +92,7 @@ select {
 }
 
 .primary-action:hover {
-  background: #126f5d;
+  background: #08766c;
 }
 
 .login-panel .primary-action:hover {
@@ -113,6 +113,10 @@ select {
 .app-shell {
   min-height: 100vh;
   padding: 28px;
+  background:
+    radial-gradient(circle at top left, rgba(40, 132, 199, 0.16), transparent 32rem),
+    radial-gradient(circle at top right, rgba(13, 143, 131, 0.14), transparent 30rem),
+    #eef4f7;
 }
 
 .topbar {
@@ -127,11 +131,12 @@ select {
   margin: 0;
   font-size: clamp(2rem, 4vw, 3rem);
   letter-spacing: 0;
+  color: #101a2c;
 }
 
 .page-subtitle {
   margin: 8px 0 0;
-  color: #637281;
+  color: #526579;
 }
 
 .user-strip {
@@ -139,11 +144,11 @@ select {
   align-items: center;
   gap: 12px;
   background: white;
-  border: 1px solid #dae6eb;
+  border: 1px solid rgba(162, 185, 199, 0.62);
   border-radius: 8px;
   padding: 8px;
   font-weight: 800;
-  box-shadow: 0 10px 30px rgba(34, 61, 79, 0.06);
+  box-shadow: 0 12px 32px rgba(31, 52, 76, 0.08);
 }
 
 .user-strip img {
@@ -172,10 +177,10 @@ select {
   position: relative;
   overflow: hidden;
   background: white;
-  border: 1px solid #dae6eb;
+  border: 1px solid rgba(169, 191, 204, 0.64);
   border-radius: 8px;
   padding: 18px;
-  box-shadow: 0 10px 30px rgba(34, 61, 79, 0.05);
+  box-shadow: 0 12px 30px rgba(31, 52, 76, 0.07);
 }
 
 .metric::before {
@@ -183,15 +188,15 @@ select {
   position: absolute;
   inset: 0 auto 0 0;
   width: 4px;
-  background: #6c8393;
+  background: #2f6fa5;
 }
 
 .success-metric::before {
-  background: #159b68;
+  background: #0d8f83;
 }
 
 .failed-metric::before {
-  background: #d34c3f;
+  background: #e05a47;
 }
 
 .metric span {
@@ -216,10 +221,10 @@ select {
 .control-panel,
 .run-panel {
   background: white;
-  border: 1px solid #dae6eb;
+  border: 1px solid rgba(169, 191, 204, 0.66);
   border-radius: 8px;
   padding: 18px;
-  box-shadow: 0 14px 36px rgba(34, 61, 79, 0.06);
+  box-shadow: 0 16px 38px rgba(31, 52, 76, 0.08);
 }
 
 .control-panel {
@@ -262,8 +267,8 @@ select {
 }
 
 select:focus {
-  outline: 3px solid rgba(22, 134, 111, 0.18);
-  border-color: #16866f;
+  outline: 3px solid rgba(13, 143, 131, 0.2);
+  border-color: #0d8f83;
 }
 
 .panel-heading {
@@ -295,14 +300,14 @@ select:focus {
 
 .pill.success,
 .pill.high {
-  background: #dcf7ea;
-  color: #116447;
+  background: #d9f8ef;
+  color: #08624f;
 }
 
 .pill.failure,
 .pill.low {
-  background: #ffe4e0;
-  color: #912a20;
+  background: #ffe3de;
+  color: #9a2b1e;
 }
 
 .pill.medium {
@@ -313,8 +318,8 @@ select:focus {
 .pill.dispatched,
 .pill.in_progress,
 .pill.queued {
-  background: #e5f0ff;
-  color: #25599b;
+  background: #e2f0ff;
+  color: #1f5e9e;
 }
 
 .details {
@@ -376,8 +381,8 @@ dd {
   border-radius: 18px;
   display: grid;
   place-items: center;
-  background: #e3f4ef;
-  color: #116e5b;
+  background: #e1f7f2;
+  color: #08766c;
   font-weight: 950;
 }
 
@@ -435,4 +440,3 @@ dd {
     position: static;
   }
 }
-

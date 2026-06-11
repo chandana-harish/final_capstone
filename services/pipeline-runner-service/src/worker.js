@@ -17,11 +17,14 @@ async function sleep(ms) {
 
 async function findDispatchedRun(payload) {
   const dispatchedAt = new Date(payload.dispatchedAt || Date.now()).getTime();
-  for (let attempt = 0; attempt < 12; attempt += 1) {
+  for (let attempt = 0; attempt < 36; attempt += 1) {
     const data = await serviceJson(
       `${githubServiceUrl}/internal/users/${payload.userId}/repos/${payload.owner}/${payload.repo}/runs?branch=${encodeURIComponent(payload.branch)}&workflow_id=${encodeURIComponent(payload.workflowId)}`
     );
-    const candidate = data.workflow_runs?.find((run) => new Date(run.created_at).getTime() >= dispatchedAt - 30000);
+    const runs = data.workflow_runs || [];
+    const candidate =
+      runs.find((run) => new Date(run.created_at).getTime() >= dispatchedAt - 120000) ||
+      runs[0];
     if (candidate) return candidate;
     await sleep(5000);
   }
@@ -29,7 +32,16 @@ async function findDispatchedRun(payload) {
 }
 
 async function monitor(payload) {
-  let run = await findDispatchedRun(payload);
+  let run;
+  try {
+    run = await findDispatchedRun(payload);
+  } catch (error) {
+    await query(
+      "UPDATE pipeline_runs SET status = 'dispatch_not_found', conclusion = NULL WHERE id = $1",
+      [payload.pipelineRunId]
+    );
+    throw error;
+  }
   await query(
     `UPDATE pipeline_runs
      SET github_run_id = $1, status = $2, conclusion = $3, commit_sha = $4, started_at = $5

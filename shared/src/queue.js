@@ -3,11 +3,28 @@ import { requireEnv } from "./config.js";
 
 let channel;
 
+async function sleep(ms) {
+  await new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 export async function getChannel() {
   if (channel) return channel;
-  const connection = await amqp.connect(requireEnv("RABBITMQ_URL"));
-  channel = await connection.createChannel();
-  return channel;
+  let lastError;
+  for (let attempt = 1; attempt <= 30; attempt += 1) {
+    try {
+      const connection = await amqp.connect(requireEnv("RABBITMQ_URL"));
+      connection.on("close", () => {
+        channel = undefined;
+      });
+      channel = await connection.createChannel();
+      return channel;
+    } catch (error) {
+      lastError = error;
+      console.error(`RabbitMQ connection attempt ${attempt} failed: ${error.message}`);
+      await sleep(2000);
+    }
+  }
+  throw lastError;
 }
 
 export async function publish(queueName, payload) {
@@ -34,4 +51,3 @@ export async function consume(queueName, handler) {
     }
   });
 }
-

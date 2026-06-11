@@ -12,13 +12,14 @@ async function serviceJson(url) {
 
 function classifyFailure(lines) {
   const joined = lines.join("\n").toLowerCase();
+  if (joined.includes("aadsts") || joined.includes("azure/login") || joined.includes("az login") || joined.includes("authenticate interactively")) return "permission/authentication issue";
   if (joined.includes("npm err") || joined.includes("package-lock") || joined.includes("dependency") || joined.includes("pip install")) return "dependency issue";
   if (joined.includes("test failed") || joined.includes("expected") || joined.includes("assertion") || joined.includes("jest")) return "test failure";
   if (joined.includes("docker build") || joined.includes("dockerfile") || joined.includes("failed to solve")) return "Docker image build failure";
   if (joined.includes("kubectl") || joined.includes("helm") || joined.includes("deployment") || joined.includes("rollout")) return "deployment failure";
   if (joined.includes("secret") || joined.includes("environment variable") || joined.includes("env var") || joined.includes("not defined")) return "environment variable/secrets issue";
   if (joined.includes("timed out") || joined.includes("timeout") || joined.includes("cancelled")) return "timeout issue";
-  if (joined.includes("permission denied") || joined.includes("unauthorized") || joined.includes("forbidden") || joined.includes("authentication")) return "permission/authentication issue";
+  if (joined.includes("permission denied") || joined.includes("unauthorized") || joined.includes("forbidden") || joined.includes("authentication") || joined.includes("authenticate")) return "permission/authentication issue";
   return "build failure";
 }
 
@@ -101,4 +102,3 @@ async function analyze(payload) {
 
 await consume("pipeline.analyze", analyze);
 console.log("workflow-analyzer-service consuming pipeline.analyze");
-

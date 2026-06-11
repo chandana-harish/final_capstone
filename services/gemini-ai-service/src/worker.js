@@ -50,6 +50,44 @@ function normalizeRecommendation(value) {
   };
 }
 
+function evidenceBasedFallback(payload, error) {
+  const evidence = `${payload.errorSummary}\n${payload.importantLogLines.join("\n")}`.toLowerCase();
+
+  if (evidence.includes("aadsts700016") || evidence.includes("application with identifier") || evidence.includes("azure/login")) {
+    return {
+      failureReason: "Azure login failed in GitHub Actions",
+      explanation: "The workflow failed during the Azure login step before deployment could continue.",
+      possibleRootCause: "The Azure client/application id configured for GitHub OIDC login was not found in the target Azure tenant, or the workflow is authenticating against the wrong tenant.",
+      suggestedFix: "Verify the Azure federated identity credentials and GitHub secrets used by azure/login. Check AZURE_CLIENT_ID, AZURE_TENANT_ID, and AZURE_SUBSCRIPTION_ID, make sure the app registration exists in that tenant, and confirm the federated credential subject matches this repo, branch, and workflow.",
+      riskScore: 85,
+      confidenceLevel: "high",
+      insufficientEvidence: false
+    };
+  }
+
+  if (payload.category === "permission/authentication issue") {
+    return {
+      failureReason: "Authentication or permission failure",
+      explanation: "The workflow failed while authenticating or accessing a protected resource.",
+      possibleRootCause: "A token, secret, service principal, federated credential, or permission assignment is missing or incorrect.",
+      suggestedFix: "Review the failed authentication step and verify the required secrets, identities, tenant/subscription values, and role assignments. Re-run the workflow after correcting the credentials.",
+      riskScore: 80,
+      confidenceLevel: "medium",
+      insufficientEvidence: false
+    };
+  }
+
+  return {
+    failureReason: "Gemini analysis unavailable",
+    explanation: "PipelineIQ detected the failed workflow and extracted error evidence, but Gemini could not complete the recommendation.",
+    possibleRootCause: payload.category || "Unknown",
+    suggestedFix: `Check gemini-ai-service logs for: ${error.message}. Then verify GEMINI_API_KEY and GEMINI_MODEL, and rerun the failed pipeline.`,
+    riskScore: 50,
+    confidenceLevel: "low",
+    insufficientEvidence: true
+  };
+}
+
 async function callGemini(prompt) {
   const model = optionalEnv("GEMINI_MODEL", "gemini-1.5-pro");
   const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${requireEnv("GEMINI_API_KEY")}`, {
@@ -83,15 +121,7 @@ async function analyzeWithGemini(payload) {
     recommendation = await callGemini(buildPrompt(payload, run));
   } catch (error) {
     console.error("Gemini analysis failed", error);
-    recommendation = {
-      failureReason: "Gemini analysis unavailable",
-      explanation: "PipelineIQ detected the failed workflow and extracted error evidence, but Gemini could not complete the recommendation.",
-      possibleRootCause: payload.category || "Unknown",
-      suggestedFix: "Check the Gemini API key, model name, and gemini-ai-service logs, then rerun analysis for this failed pipeline.",
-      riskScore: 50,
-      confidenceLevel: "low",
-      insufficientEvidence: true
-    };
+    recommendation = evidenceBasedFallback(payload, error);
   }
 
   await query(

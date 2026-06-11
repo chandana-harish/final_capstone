@@ -35,6 +35,16 @@ function StatusPill({ value }) {
   return <span className={className}>{value || "unknown"}</span>;
 }
 
+function EmptyState() {
+  return (
+    <div className="empty-state">
+      <div className="empty-icon">CI</div>
+      <h2>No pipeline running</h2>
+      <p>Select a repository, workflow, and branch, then start the GitHub Actions workflow from PipelineIQ.</p>
+    </div>
+  );
+}
+
 function Login() {
   return (
     <main className="login-shell">
@@ -42,6 +52,7 @@ function Login() {
         <div>
           <p className="eyebrow">PipelineIQ</p>
           <h1>Run GitHub Actions workflows and get failure fixes from Gemini.</h1>
+          <p className="login-copy">Trigger real workflows, watch their status, and turn failed logs into clear remediation steps.</p>
         </div>
         <a className="primary-action" href={`${AUTH_BASE}/api/auth/github`}>
           Login with GitHub
@@ -164,6 +175,7 @@ function App() {
         <div>
           <p className="eyebrow">PipelineIQ</p>
           <h1>GitHub Actions Runner</h1>
+          <p className="page-subtitle">Run selected workflows, monitor status, and analyze failed jobs with Gemini.</p>
         </div>
         <div className="user-strip">
           {user.avatar_url && <img src={user.avatar_url} alt="" />}
@@ -176,14 +188,14 @@ function App() {
 
       <section className="summary-grid">
         <div className="metric">
-          <span>Total</span>
+          <span>Total Runs</span>
           <strong>{summary?.summary?.total_runs ?? 0}</strong>
         </div>
-        <div className="metric">
+        <div className="metric success-metric">
           <span>Passed</span>
           <strong>{summary?.summary?.passed_runs ?? 0}</strong>
         </div>
-        <div className="metric">
+        <div className="metric failed-metric">
           <span>Failed</span>
           <strong>{summary?.summary?.failed_runs ?? 0}</strong>
         </div>
@@ -191,6 +203,10 @@ function App() {
 
       <section className="workspace">
         <div className="control-panel">
+          <div className="section-heading">
+            <h2>Run Pipeline</h2>
+            <p>Choose the exact GitHub Actions workflow to dispatch.</p>
+          </div>
           <label>
             Repository
             <select value={selectedRepoId} onChange={(event) => setSelectedRepoId(event.target.value)}>
@@ -232,7 +248,7 @@ function App() {
             {currentRun && <StatusPill value={currentRun.conclusion || currentRun.status} />}
           </div>
 
-          {!currentRun && <p className="muted">Select a repository, workflow, and branch to run the pipeline.</p>}
+          {!currentRun && <EmptyState />}
 
           {currentRun && (
             <dl className="details">

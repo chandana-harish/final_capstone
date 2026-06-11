@@ -1,7 +1,7 @@
 :root {
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  color: #19212a;
-  background: #eef2f5;
+  color: #16212d;
+  background: #f3f7f8;
 }
 
 * {
@@ -21,33 +21,46 @@ select {
   min-height: 100vh;
   display: grid;
   place-items: center;
-  padding: 24px;
+  padding: 28px;
   background:
-    linear-gradient(120deg, rgba(34, 97, 90, 0.82), rgba(34, 56, 84, 0.78)),
+    linear-gradient(115deg, rgba(11, 39, 48, 0.84), rgba(20, 89, 76, 0.68)),
     url("https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1800&q=80");
   background-size: cover;
   background-position: center;
 }
 
 .login-panel {
-  width: min(760px, 100%);
+  width: min(860px, 100%);
   color: white;
 }
 
 .login-panel h1 {
-  max-width: 720px;
-  margin: 0 0 28px;
-  font-size: clamp(2.4rem, 7vw, 5rem);
-  line-height: 1;
+  max-width: 780px;
+  margin: 0;
+  font-size: clamp(2.5rem, 7vw, 5.5rem);
+  line-height: 0.98;
   letter-spacing: 0;
+}
+
+.login-copy {
+  max-width: 620px;
+  margin: 20px 0 30px;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 1.08rem;
+  line-height: 1.6;
 }
 
 .eyebrow {
   margin: 0 0 8px;
-  font-size: 0.78rem;
-  font-weight: 800;
-  letter-spacing: 0.14em;
+  font-size: 0.76rem;
+  font-weight: 900;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
+  color: #1b7d6a;
+}
+
+.login-panel .eyebrow {
+  color: #9ff3dc;
 }
 
 .primary-action,
@@ -61,121 +74,196 @@ select {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-weight: 800;
+  font-weight: 850;
 }
 
 .primary-action {
-  background: #1f7a63;
+  width: 100%;
+  background: #16866f;
   color: white;
+  box-shadow: 0 10px 24px rgba(22, 134, 111, 0.22);
+}
+
+.login-panel .primary-action {
+  width: auto;
+  min-width: 190px;
+  background: #f5fbf8;
+  color: #12382f;
+}
+
+.primary-action:hover {
+  background: #126f5d;
+}
+
+.login-panel .primary-action:hover {
+  background: white;
 }
 
 .primary-action:disabled {
-  opacity: 0.5;
+  opacity: 0.55;
   cursor: not-allowed;
+  box-shadow: none;
 }
 
 .ghost-button {
-  background: #e8edf1;
-  color: #24313d;
+  background: #e9f0f2;
+  color: #263541;
 }
 
 .app-shell {
   min-height: 100vh;
-  padding: 24px;
+  padding: 28px;
 }
 
 .topbar {
   display: flex;
   justify-content: space-between;
-  gap: 20px;
-  align-items: center;
-  margin-bottom: 20px;
+  gap: 24px;
+  align-items: flex-start;
+  margin-bottom: 24px;
 }
 
 .topbar h1 {
   margin: 0;
-  font-size: 2rem;
+  font-size: clamp(2rem, 4vw, 3rem);
+  letter-spacing: 0;
+}
+
+.page-subtitle {
+  margin: 8px 0 0;
+  color: #637281;
 }
 
 .user-strip {
   display: flex;
   align-items: center;
   gap: 12px;
-  font-weight: 700;
+  background: white;
+  border: 1px solid #dae6eb;
+  border-radius: 8px;
+  padding: 8px;
+  font-weight: 800;
+  box-shadow: 0 10px 30px rgba(34, 61, 79, 0.06);
 }
 
 .user-strip img {
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
 }
 
 .alert {
-  background: #ffe7e7;
-  border: 1px solid #d1495b;
-  color: #7c1f2b;
+  background: #fff1ef;
+  border: 1px solid #ef9c91;
+  color: #872f25;
   border-radius: 8px;
   padding: 12px 14px;
-  margin-bottom: 16px;
+  margin-bottom: 18px;
 }
 
 .summary-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
+  gap: 14px;
   margin-bottom: 18px;
 }
 
 .metric {
+  position: relative;
+  overflow: hidden;
   background: white;
-  border: 1px solid #d7e0e7;
+  border: 1px solid #dae6eb;
   border-radius: 8px;
-  padding: 16px;
+  padding: 18px;
+  box-shadow: 0 10px 30px rgba(34, 61, 79, 0.05);
+}
+
+.metric::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: #6c8393;
+}
+
+.success-metric::before {
+  background: #159b68;
+}
+
+.failed-metric::before {
+  background: #d34c3f;
 }
 
 .metric span {
   display: block;
-  color: #5a6875;
-  margin-bottom: 8px;
+  color: #657685;
+  margin-bottom: 9px;
+  font-weight: 700;
 }
 
 .metric strong {
-  font-size: 2rem;
+  font-size: 2.15rem;
+  line-height: 1;
 }
 
 .workspace {
   display: grid;
   grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
   gap: 18px;
+  align-items: start;
 }
 
 .control-panel,
 .run-panel {
   background: white;
-  border: 1px solid #d7e0e7;
+  border: 1px solid #dae6eb;
   border-radius: 8px;
   padding: 18px;
+  box-shadow: 0 14px 36px rgba(34, 61, 79, 0.06);
 }
 
 .control-panel {
   display: grid;
   gap: 16px;
   align-content: start;
+  position: sticky;
+  top: 18px;
+}
+
+.section-heading h2,
+.panel-heading h2,
+.analysis h2 {
+  margin: 0;
+  font-size: 1.22rem;
+  letter-spacing: 0;
+}
+
+.section-heading p {
+  margin: 6px 0 0;
+  color: #6a7987;
+  font-size: 0.92rem;
+  line-height: 1.45;
 }
 
 label {
   display: grid;
   gap: 7px;
-  font-weight: 800;
+  font-weight: 850;
 }
 
 select {
   width: 100%;
-  min-height: 42px;
-  border: 1px solid #becbd5;
+  min-height: 44px;
+  border: 1px solid #c7d5dd;
   border-radius: 8px;
-  padding: 0 10px;
-  background: white;
+  padding: 0 12px;
+  background: #fbfdfe;
+  color: #17222e;
+}
+
+select:focus {
+  outline: 3px solid rgba(22, 134, 111, 0.18);
+  border-color: #16866f;
 }
 
 .panel-heading {
@@ -183,13 +271,9 @@ select {
   justify-content: space-between;
   gap: 12px;
   align-items: center;
-  margin-bottom: 12px;
-}
-
-.panel-heading h2,
-.analysis h2 {
-  margin: 0;
-  font-size: 1.25rem;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e2ebef;
+  margin-bottom: 16px;
 }
 
 .muted {
@@ -199,31 +283,38 @@ select {
 .pill {
   display: inline-flex;
   align-items: center;
-  min-height: 28px;
+  min-height: 30px;
   border-radius: 999px;
-  padding: 0 10px;
-  background: #edf1f4;
+  padding: 0 11px;
+  background: #ecf2f4;
   color: #344250;
   font-size: 0.82rem;
-  font-weight: 800;
+  font-weight: 900;
   text-transform: capitalize;
 }
 
 .pill.success,
 .pill.high {
-  background: #dff5ea;
-  color: #176044;
+  background: #dcf7ea;
+  color: #116447;
 }
 
 .pill.failure,
 .pill.low {
-  background: #ffe2df;
-  color: #8c2b22;
+  background: #ffe4e0;
+  color: #912a20;
 }
 
 .pill.medium {
-  background: #fff3cd;
-  color: #755b11;
+  background: #fff1c7;
+  color: #73570b;
+}
+
+.pill.dispatched,
+.pill.in_progress,
+.pill.queued {
+  background: #e5f0ff;
+  color: #25599b;
 }
 
 .details {
@@ -232,32 +323,79 @@ select {
   gap: 12px;
 }
 
+.details.compact {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 14px;
+}
+
 .details div {
-  border: 1px solid #e0e7ed;
+  border: 1px solid #e3ebf0;
   border-radius: 8px;
-  padding: 12px;
+  padding: 13px;
+  background: #fbfdfe;
 }
 
 dt {
   color: #667684;
   font-size: 0.82rem;
-  margin-bottom: 4px;
+  margin-bottom: 5px;
 }
 
 dd {
   margin: 0;
-  font-weight: 800;
+  font-weight: 850;
   overflow-wrap: anywhere;
+}
+
+.empty-state {
+  min-height: 320px;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  color: #6b7b88;
+  border: 1px dashed #cbd9e0;
+  border-radius: 8px;
+  padding: 28px;
+  background: #fbfdfe;
+}
+
+.empty-state h2 {
+  margin: 12px 0 6px;
+  color: #25323d;
+}
+
+.empty-state p {
+  max-width: 430px;
+  margin: 0;
+  line-height: 1.55;
+}
+
+.empty-icon {
+  width: 58px;
+  height: 58px;
+  border-radius: 18px;
+  display: grid;
+  place-items: center;
+  background: #e3f4ef;
+  color: #116e5b;
+  font-weight: 950;
 }
 
 .analysis {
   margin-top: 22px;
-  border-top: 1px solid #dfe6ec;
+  border-top: 1px solid #e2ebef;
   padding-top: 18px;
 }
 
 .analysis h3 {
-  margin: 16px 0 6px;
+  margin: 18px 0 7px;
+}
+
+.analysis p {
+  max-width: 980px;
+  margin: 0;
+  line-height: 1.65;
+  color: #344553;
 }
 
 .risk-row {
@@ -265,21 +403,16 @@ dd {
   align-items: center;
   gap: 12px;
   margin-top: 12px;
+  margin-bottom: 12px;
 }
 
-pre {
-  white-space: pre-wrap;
-  background: #18212b;
-  color: #f3f7fb;
-  border-radius: 8px;
-  padding: 14px;
-  max-height: 260px;
-  overflow: auto;
+.risk-row strong {
+  font-size: 1.25rem;
 }
 
-@media (max-width: 820px) {
+@media (max-width: 900px) {
   .app-shell {
-    padding: 16px;
+    padding: 18px;
   }
 
   .topbar,
@@ -288,9 +421,18 @@ pre {
     display: grid;
   }
 
+  .user-strip {
+    justify-self: start;
+  }
+
   .summary-grid,
-  .details {
+  .details,
+  .details.compact {
     grid-template-columns: 1fr;
+  }
+
+  .control-panel {
+    position: static;
   }
 }
 

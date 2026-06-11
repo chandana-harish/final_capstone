@@ -1,0 +1,13 @@
+{
+  "name": "webhook-service",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js"
+  },
+  "dependencies": {
+    "@pipelineiq/shared": "file:../../shared",
+    "express": "^4.19.2"
+  }
+}
+

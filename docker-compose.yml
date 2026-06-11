@@ -1,0 +1,116 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: pipelineiq
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: pipelineiq
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./shared/db/schema.sql:/docker-entrypoint-initdb.d/001-schema.sql:ro
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  auth-service:
+    build:
+      context: .
+      dockerfile: services/auth-service/Dockerfile
+    env_file: .env
+    ports:
+      - "8081:8081"
+    depends_on:
+      - postgres
+
+  github-integration-service:
+    build:
+      context: .
+      dockerfile: services/github-integration-service/Dockerfile
+    env_file: .env
+    ports:
+      - "8082:8082"
+    depends_on:
+      - postgres
+
+  dashboard-api:
+    build:
+      context: .
+      dockerfile: services/dashboard-api/Dockerfile
+    env_file: .env
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+      - rabbitmq
+      - github-integration-service
+
+  pipeline-runner-service:
+    build:
+      context: .
+      dockerfile: services/pipeline-runner-service/Dockerfile
+    env_file: .env
+    depends_on:
+      - rabbitmq
+      - postgres
+      - github-integration-service
+
+  workflow-analyzer-service:
+    build:
+      context: .
+      dockerfile: services/workflow-analyzer-service/Dockerfile
+    env_file: .env
+    depends_on:
+      - rabbitmq
+      - postgres
+      - github-integration-service
+
+  gemini-ai-service:
+    build:
+      context: .
+      dockerfile: services/gemini-ai-service/Dockerfile
+    env_file: .env
+    depends_on:
+      - rabbitmq
+      - postgres
+
+  webhook-service:
+    build:
+      context: .
+      dockerfile: services/webhook-service/Dockerfile
+    env_file: .env
+    ports:
+      - "8087:8087"
+    depends_on:
+      - postgres
+      - rabbitmq
+
+  notification-service:
+    build:
+      context: .
+      dockerfile: services/notification-service/Dockerfile
+    env_file: .env
+    depends_on:
+      - postgres
+      - rabbitmq
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      args:
+        VITE_API_BASE_URL: http://localhost:8080
+        VITE_AUTH_BASE_URL: http://localhost:8081
+    ports:
+      - "5173:80"
+    depends_on:
+      - dashboard-api
+      - auth-service
+
+volumes:
+  postgres-data:
+

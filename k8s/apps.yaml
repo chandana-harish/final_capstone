@@ -1,0 +1,327 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: pipelineiq
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+        - name: frontend
+          image: pipelineiq.azurecr.io/pipelineiq-frontend:latest
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 250m
+              memory: 128Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+  namespace: pipelineiq
+spec:
+  selector:
+    app: frontend
+  ports:
+    - port: 80
+      targetPort: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-service
+  namespace: pipelineiq
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: auth-service
+  template:
+    metadata:
+      labels:
+        app: auth-service
+    spec:
+      containers:
+        - name: auth-service
+          image: pipelineiq.azurecr.io/auth-service:latest
+          ports:
+            - containerPort: 8081
+          envFrom:
+            - configMapRef:
+                name: pipelineiq-config
+            - secretRef:
+                name: pipelineiq-secrets
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8081
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8081
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-service
+  namespace: pipelineiq
+spec:
+  selector:
+    app: auth-service
+  ports:
+    - port: 8081
+      targetPort: 8081
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dashboard-api
+  namespace: pipelineiq
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: dashboard-api
+  template:
+    metadata:
+      labels:
+        app: dashboard-api
+    spec:
+      containers:
+        - name: dashboard-api
+          image: pipelineiq.azurecr.io/dashboard-api:latest
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: pipelineiq-config
+            - secretRef:
+                name: pipelineiq-secrets
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dashboard-api
+  namespace: pipelineiq
+spec:
+  selector:
+    app: dashboard-api
+  ports:
+    - port: 8080
+      targetPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: github-integration-service
+  namespace: pipelineiq
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: github-integration-service
+  template:
+    metadata:
+      labels:
+        app: github-integration-service
+    spec:
+      containers:
+        - name: github-integration-service
+          image: pipelineiq.azurecr.io/github-integration-service:latest
+          ports:
+            - containerPort: 8082
+          envFrom:
+            - configMapRef:
+                name: pipelineiq-config
+            - secretRef:
+                name: pipelineiq-secrets
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8082
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8082
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: github-integration-service
+  namespace: pipelineiq
+spec:
+  selector:
+    app: github-integration-service
+  ports:
+    - port: 8082
+      targetPort: 8082
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pipeline-runner-service
+  namespace: pipelineiq
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pipeline-runner-service
+  template:
+    metadata:
+      labels:
+        app: pipeline-runner-service
+    spec:
+      containers:
+        - name: pipeline-runner-service
+          image: pipelineiq.azurecr.io/pipeline-runner-service:latest
+          envFrom:
+            - configMapRef:
+                name: pipelineiq-config
+            - secretRef:
+                name: pipelineiq-secrets
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: workflow-analyzer-service
+  namespace: pipelineiq
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: workflow-analyzer-service
+  template:
+    metadata:
+      labels:
+        app: workflow-analyzer-service
+    spec:
+      containers:
+        - name: workflow-analyzer-service
+          image: pipelineiq.azurecr.io/workflow-analyzer-service:latest
+          envFrom:
+            - configMapRef:
+                name: pipelineiq-config
+            - secretRef:
+                name: pipelineiq-secrets
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gemini-ai-service
+  namespace: pipelineiq
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gemini-ai-service
+  template:
+    metadata:
+      labels:
+        app: gemini-ai-service
+    spec:
+      containers:
+        - name: gemini-ai-service
+          image: pipelineiq.azurecr.io/gemini-ai-service:latest
+          envFrom:
+            - configMapRef:
+                name: pipelineiq-config
+            - secretRef:
+                name: pipelineiq-secrets
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webhook-service
+  namespace: pipelineiq
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: webhook-service
+  template:
+    metadata:
+      labels:
+        app: webhook-service
+    spec:
+      containers:
+        - name: webhook-service
+          image: pipelineiq.azurecr.io/webhook-service:latest
+          ports:
+            - containerPort: 8087
+          envFrom:
+            - configMapRef:
+                name: pipelineiq-config
+            - secretRef:
+                name: pipelineiq-secrets
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8087
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8087
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: webhook-service
+  namespace: pipelineiq
+spec:
+  selector:
+    app: webhook-service
+  ports:
+    - port: 8087
+      targetPort: 8087
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notification-service
+  namespace: pipelineiq
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: notification-service
+  template:
+    metadata:
+      labels:
+        app: notification-service
+    spec:
+      containers:
+        - name: notification-service
+          image: pipelineiq.azurecr.io/notification-service:latest
+          envFrom:
+            - configMapRef:
+                name: pipelineiq-config
+            - secretRef:
+                name: pipelineiq-secrets
+

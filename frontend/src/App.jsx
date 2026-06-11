@@ -1,0 +1,266 @@
+import React, { useEffect, useMemo, useState } from "react";
+import { createRoot } from "react-dom/client";
+import "./styles.css";
+
+const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "";
+const AUTH_BASE = import.meta.env.VITE_AUTH_BASE_URL ?? "";
+
+async function api(path, options = {}) {
+  const response = await fetch(`${API_BASE}${path}`, {
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+      ...(options.headers || {})
+    },
+    ...options
+  });
+  const body = await response.json();
+  if (!response.ok) throw new Error(body.error || "Request failed");
+  return body;
+}
+
+async function auth(path, options = {}) {
+  const response = await fetch(`${AUTH_BASE}${path}`, {
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    ...options
+  });
+  const body = await response.json();
+  if (!response.ok) throw new Error(body.error || "Request failed");
+  return body;
+}
+
+function StatusPill({ value }) {
+  const className = `pill ${value || "unknown"}`;
+  return <span className={className}>{value || "unknown"}</span>;
+}
+
+function Login() {
+  return (
+    <main className="login-shell">
+      <section className="login-panel">
+        <div>
+          <p className="eyebrow">PipelineIQ</p>
+          <h1>Run GitHub Actions workflows and get failure fixes from Gemini.</h1>
+        </div>
+        <a className="primary-action" href={`${AUTH_BASE}/api/auth/github`}>
+          Login with GitHub
+        </a>
+      </section>
+    </main>
+  );
+}
+
+function App() {
+  const [user, setUser] = useState(null);
+  const [repos, setRepos] = useState([]);
+  const [workflows, setWorkflows] = useState([]);
+  const [branches, setBranches] = useState([]);
+  const [selectedRepoId, setSelectedRepoId] = useState("");
+  const [selectedWorkflowId, setSelectedWorkflowId] = useState("");
+  const [selectedBranch, setSelectedBranch] = useState("");
+  const [currentRun, setCurrentRun] = useState(null);
+  const [analysis, setAnalysis] = useState(null);
+  const [summary, setSummary] = useState(null);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const selectedRepo = useMemo(
+    () => repos.find((repo) => repo.id === selectedRepoId),
+    [repos, selectedRepoId]
+  );
+  const selectedWorkflow = useMemo(
+    () => workflows.find((workflow) => String(workflow.id) === selectedWorkflowId),
+    [workflows, selectedWorkflowId]
+  );
+
+  useEffect(() => {
+    auth("/api/auth/me")
+      .then(({ user }) => setUser(user))
+      .catch(() => setUser(null));
+  }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    setLoading(true);
+    Promise.all([api("/api/repos"), api("/api/dashboard/summary")])
+      .then(([repoData, summaryData]) => {
+        setRepos(repoData.repositories || []);
+        setSummary(summaryData);
+      })
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false));
+  }, [user]);
+
+  useEffect(() => {
+    if (!selectedRepo) return;
+    setWorkflows([]);
+    setBranches([]);
+    setSelectedWorkflowId("");
+    setSelectedBranch("");
+    Promise.all([
+      api(`/api/repos/${selectedRepo.owner}/${selectedRepo.name}/workflows`),
+      api(`/api/repos/${selectedRepo.owner}/${selectedRepo.name}/branches`)
+    ])
+      .then(([workflowData, branchData]) => {
+        setWorkflows(workflowData.workflows || []);
+        setBranches(branchData.branches || []);
+        setSelectedBranch(selectedRepo.default_branch || branchData.branches?.[0]?.name || "");
+      })
+      .catch((err) => setError(err.message));
+  }, [selectedRepo]);
+
+  useEffect(() => {
+    if (!currentRun?.id) return;
+    const interval = setInterval(async () => {
+      try {
+        const data = await api(`/api/pipeline-runs/${currentRun.id}`);
+        setCurrentRun(data.pipelineRun);
+        setAnalysis(data.analysis);
+        if (data.pipelineRun.status === "completed" || data.pipelineRun.status === "monitor_timeout") {
+          clearInterval(interval);
+        }
+      } catch (err) {
+        setError(err.message);
+      }
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [currentRun?.id]);
+
+  async function runPipeline() {
+    if (!selectedRepo || !selectedWorkflowId || !selectedBranch) return;
+    setLoading(true);
+    setError("");
+    setAnalysis(null);
+    try {
+      const data = await api(`/api/repos/${selectedRepo.owner}/${selectedRepo.name}/workflows/${selectedWorkflowId}/run`, {
+        method: "POST",
+        body: JSON.stringify({
+          branch: selectedBranch,
+          workflowName: selectedWorkflow?.name,
+          repositoryId: selectedRepo.id
+        })
+      });
+      setCurrentRun(data.pipelineRun);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function logout() {
+    await auth("/api/auth/logout", { method: "POST" });
+    setUser(null);
+  }
+
+  if (!user) return <Login />;
+
+  return (
+    <main className="app-shell">
+      <header className="topbar">
+        <div>
+          <p className="eyebrow">PipelineIQ</p>
+          <h1>GitHub Actions Runner</h1>
+        </div>
+        <div className="user-strip">
+          {user.avatar_url && <img src={user.avatar_url} alt="" />}
+          <span>{user.username}</span>
+          <button className="ghost-button" onClick={logout}>Logout</button>
+        </div>
+      </header>
+
+      {error && <div className="alert">{error}</div>}
+
+      <section className="summary-grid">
+        <div className="metric">
+          <span>Total</span>
+          <strong>{summary?.summary?.total_runs ?? 0}</strong>
+        </div>
+        <div className="metric">
+          <span>Passed</span>
+          <strong>{summary?.summary?.passed_runs ?? 0}</strong>
+        </div>
+        <div className="metric">
+          <span>Failed</span>
+          <strong>{summary?.summary?.failed_runs ?? 0}</strong>
+        </div>
+      </section>
+
+      <section className="workspace">
+        <div className="control-panel">
+          <label>
+            Repository
+            <select value={selectedRepoId} onChange={(event) => setSelectedRepoId(event.target.value)}>
+              <option value="">Select repository</option>
+              {repos.map((repo) => (
+                <option key={repo.id} value={repo.id}>{repo.full_name}</option>
+              ))}
+            </select>
+          </label>
+
+          <label>
+            Workflow
+            <select value={selectedWorkflowId} onChange={(event) => setSelectedWorkflowId(event.target.value)} disabled={!workflows.length}>
+              <option value="">Select workflow</option>
+              {workflows.map((workflow) => (
+                <option key={workflow.id} value={workflow.id}>{workflow.name}</option>
+              ))}
+            </select>
+          </label>
+
+          <label>
+            Branch
+            <select value={selectedBranch} onChange={(event) => setSelectedBranch(event.target.value)} disabled={!branches.length}>
+              <option value="">Select branch</option>
+              {branches.map((branch) => (
+                <option key={branch.name} value={branch.name}>{branch.name}</option>
+              ))}
+            </select>
+          </label>
+
+          <button className="primary-action" disabled={loading || !selectedRepo || !selectedWorkflowId || !selectedBranch} onClick={runPipeline}>
+            {loading ? "Starting..." : "Run Pipeline"}
+          </button>
+        </div>
+
+        <div className="run-panel">
+          <div className="panel-heading">
+            <h2>Current Run</h2>
+            {currentRun && <StatusPill value={currentRun.conclusion || currentRun.status} />}
+          </div>
+
+          {!currentRun && <p className="muted">Select a repository, workflow, and branch to run the pipeline.</p>}
+
+          {currentRun && (
+            <dl className="details">
+              <div><dt>Repository</dt><dd>{currentRun.owner}/{currentRun.repo}</dd></div>
+              <div><dt>Workflow</dt><dd>{currentRun.workflow_name || currentRun.workflow_id}</dd></div>
+              <div><dt>Branch</dt><dd>{currentRun.branch}</dd></div>
+              <div><dt>GitHub Run</dt><dd>{currentRun.github_run_id || "Waiting for GitHub run id"}</dd></div>
+            </dl>
+          )}
+
+          {analysis && (
+            <div className="analysis">
+              <h2>Failure Analysis</h2>
+              <div className="risk-row">
+                <span>Risk Score</span>
+                <strong>{analysis.risk_score}/100</strong>
+                <StatusPill value={analysis.confidence_level} />
+              </div>
+              <h3>{analysis.failure_reason}</h3>
+              <p>{analysis.explanation}</p>
+              <h3>Suggested Fix</h3>
+              <p>{analysis.suggested_fix}</p>
+              <h3>Evidence</h3>
+              <pre>{analysis.error_summary}</pre>
+            </div>
+          )}
+        </div>
+      </section>
+    </main>
+  );
+}
+
+createRoot(document.getElementById("root")).render(<App />);

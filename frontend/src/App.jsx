@@ -118,7 +118,7 @@ function App() {
         setCurrentRun(data.pipelineRun);
         setAnalysis(data.analysis);
         const terminalSuccess = data.pipelineRun.status === "completed" && data.pipelineRun.conclusion !== "failure";
-        const failedRunWithAnalysis = data.pipelineRun.conclusion === "failure" && data.analysis;
+        const failedRunWithAnalysis = data.pipelineRun.conclusion === "failure" && data.analysis?.failure_reason;
         if (terminalSuccess || failedRunWithAnalysis || data.pipelineRun.status === "monitor_timeout") {
           clearInterval(interval);
         }
@@ -243,7 +243,7 @@ function App() {
             </dl>
           )}
 
-          {analysis && (
+          {analysis?.failure_reason && (
             <div className="analysis">
               <h2>Failure Analysis</h2>
               <div className="risk-row">
@@ -253,17 +253,28 @@ function App() {
               </div>
               <h3>{analysis.failure_reason}</h3>
               <p>{analysis.explanation}</p>
+              {analysis.possible_root_cause && (
+                <>
+                  <h3>Possible Root Cause</h3>
+                  <p>{analysis.possible_root_cause}</p>
+                </>
+              )}
               <h3>Suggested Fix</h3>
               <p>{analysis.suggested_fix}</p>
-              <h3>Evidence</h3>
-              <pre>{analysis.error_summary}</pre>
             </div>
           )}
 
-          {currentRun?.conclusion === "failure" && !analysis && (
+          {currentRun?.conclusion === "failure" && !analysis?.failure_reason && (
             <div className="analysis pending">
               <h2>Failure Analysis</h2>
-              <p>PipelineIQ detected the failed run. The analyzer is fetching logs and Gemini will generate the cause and suggested fix shortly.</p>
+              <p>PipelineIQ detected the failed run. Gemini is preparing the failure cause and suggested fix.</p>
+              {analysis?.category && (
+                <dl className="details compact">
+                  <div><dt>Failed Job</dt><dd>{analysis.failed_job || "Unknown"}</dd></div>
+                  <div><dt>Failed Step</dt><dd>{analysis.failed_step || "Unknown"}</dd></div>
+                  <div><dt>Category</dt><dd>{analysis.category}</dd></div>
+                </dl>
+              )}
             </div>
           )}
         </div>

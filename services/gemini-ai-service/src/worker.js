@@ -78,7 +78,21 @@ async function analyzeWithGemini(payload) {
   const run = runResult.rows[0];
   if (!run) throw new Error("Pipeline run not found for AI analysis");
 
-  const recommendation = await callGemini(buildPrompt(payload, run));
+  let recommendation;
+  try {
+    recommendation = await callGemini(buildPrompt(payload, run));
+  } catch (error) {
+    console.error("Gemini analysis failed", error);
+    recommendation = {
+      failureReason: "Gemini analysis unavailable",
+      explanation: "PipelineIQ detected the failed workflow and extracted error evidence, but Gemini could not complete the recommendation.",
+      possibleRootCause: payload.category || "Unknown",
+      suggestedFix: "Check the Gemini API key, model name, and gemini-ai-service logs, then rerun analysis for this failed pipeline.",
+      riskScore: 50,
+      confidenceLevel: "low",
+      insufficientEvidence: true
+    };
+  }
 
   await query(
     `INSERT INTO ai_recommendations (
@@ -107,4 +121,3 @@ async function analyzeWithGemini(payload) {
 
 await consume("pipeline.ai", analyzeWithGemini);
 console.log("gemini-ai-service consuming pipeline.ai");
-

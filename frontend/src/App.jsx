@@ -51,7 +51,7 @@ function Login() {
       <section className="login-panel">
         <div>
           <p className="eyebrow">PipelineIQ</p>
-          <h1>Run GitHub Actions workflows and get failure fixes from Gemini.</h1>
+          <h1>AI Powered Pipeline Intelligence</h1>
           <p className="login-copy">Trigger real workflows, watch their status, and turn failed logs into clear remediation steps.</p>
         </div>
         <a className="primary-action" href={`${AUTH_BASE}/api/auth/github`}>

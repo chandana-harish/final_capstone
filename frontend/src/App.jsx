@@ -117,7 +117,9 @@ function App() {
         const data = await api(`/api/pipeline-runs/${currentRun.id}`);
         setCurrentRun(data.pipelineRun);
         setAnalysis(data.analysis);
-        if (data.pipelineRun.status === "completed" || data.pipelineRun.status === "monitor_timeout") {
+        const terminalSuccess = data.pipelineRun.status === "completed" && data.pipelineRun.conclusion !== "failure";
+        const failedRunWithAnalysis = data.pipelineRun.conclusion === "failure" && data.analysis;
+        if (terminalSuccess || failedRunWithAnalysis || data.pipelineRun.status === "monitor_timeout") {
           clearInterval(interval);
         }
       } catch (err) {
@@ -255,6 +257,13 @@ function App() {
               <p>{analysis.suggested_fix}</p>
               <h3>Evidence</h3>
               <pre>{analysis.error_summary}</pre>
+            </div>
+          )}
+
+          {currentRun?.conclusion === "failure" && !analysis && (
+            <div className="analysis pending">
+              <h2>Failure Analysis</h2>
+              <p>PipelineIQ detected the failed run. The analyzer is fetching logs and Gemini will generate the cause and suggested fix shortly.</p>
             </div>
           )}
         </div>

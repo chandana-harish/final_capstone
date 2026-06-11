@@ -23,8 +23,8 @@ select {
   place-items: center;
   padding: 28px;
   background:
-    linear-gradient(115deg, rgba(13, 31, 58, 0.84), rgba(11, 119, 111, 0.7)),
-    url("https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1800&q=80");
+    linear-gradient(90deg, rgba(6, 14, 31, 0.9) 0%, rgba(8, 24, 48, 0.74) 42%, rgba(5, 86, 84, 0.48) 100%),
+    url("./assets/login-hero-pipelineiq.png");
   background-size: cover;
   background-position: center;
 }
@@ -32,6 +32,8 @@ select {
 .login-panel {
   width: min(860px, 100%);
   color: white;
+  justify-self: start;
+  margin-left: clamp(0px, 8vw, 120px);
 }
 
 .login-panel h1 {

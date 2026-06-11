@@ -22,9 +22,7 @@ async function findDispatchedRun(payload) {
       `${githubServiceUrl}/internal/users/${payload.userId}/repos/${payload.owner}/${payload.repo}/runs?branch=${encodeURIComponent(payload.branch)}&workflow_id=${encodeURIComponent(payload.workflowId)}`
     );
     const runs = data.workflow_runs || [];
-    const candidate =
-      runs.find((run) => new Date(run.created_at).getTime() >= dispatchedAt - 120000) ||
-      runs[0];
+    const candidate = runs.find((run) => new Date(run.created_at).getTime() >= dispatchedAt - 120000);
     if (candidate) return candidate;
     await sleep(5000);
   }

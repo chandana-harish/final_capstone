@@ -412,6 +412,12 @@ dd {
   padding-top: 18px;
 }
 
+.analysis-detail {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid #e2ebef;
+}
+
 .analysis h3 {
   margin: 18px 0 7px;
 }

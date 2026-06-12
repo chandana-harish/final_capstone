@@ -323,6 +323,13 @@ function App() {
           {analysis?.failure_reason && (
             <div className="analysis">
               <h2>Failure Analysis</h2>
+              <dl className="details compact">
+                <div><dt>Failed Job</dt><dd>{analysis.failed_job || "Unknown"}</dd></div>
+                <div><dt>Failed Step</dt><dd>{analysis.failed_step || "Unknown"}</dd></div>
+                <div><dt>Category</dt><dd>{analysis.category || "Unknown"}</dd></div>
+              </dl>
+              <div className="analysis-detail">
+                <h2>AI Recommendation</h2>
               <div className="risk-row">
                 <span>Risk Score</span>
                 <strong>{analysis.risk_score}/100</strong>
@@ -352,6 +359,7 @@ function App() {
                   </div>
                 </>
               )}
+              </div>
             </div>
           )}
 

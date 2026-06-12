@@ -534,6 +534,11 @@ dd {
   font-size: 1.25rem;
 }
 
+.confidence-label {
+  color: #607282;
+  font-weight: 800;
+}
+
 @media (max-width: 900px) {
   .app-shell {
     padding: 18px;

@@ -333,6 +333,7 @@ function App() {
               <div className="risk-row">
                 <span>Risk Score</span>
                 <strong>{analysis.risk_score}/100</strong>
+                <span className="confidence-label">Confidence</span>
                 <StatusPill value={analysis.confidence_level} />
               </div>
               <h3>{analysis.failure_reason}</h3>

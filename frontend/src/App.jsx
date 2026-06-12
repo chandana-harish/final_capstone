@@ -64,6 +64,13 @@ function FixCard({ fix }) {
         <h4>{fix.title || "Suggested fix"}</h4>
       </div>
       <p>{fix.details}</p>
+      {fix.steps?.length > 0 && (
+        <ol className="fix-steps">
+          {fix.steps.map((step, index) => (
+            <li key={`${fix.title || "step"}-${index}`}>{step}</li>
+          ))}
+        </ol>
+      )}
       {fix.files?.length > 0 && (
         <div className="file-list">
           {fix.files.map((file) => <span key={file}>{file}</span>)}

@@ -23,6 +23,7 @@ Analyze only the provided evidence: failed step logs, workflow YAML, commit deta
 Do not invent secrets, cloud resources, file contents, test output, or code changes that are not supported by evidence.
 If the evidence is weak or unclear, set insufficientEvidence to true and explain what extra evidence is needed.
 Prefer actionable fixes that can make the next pipeline run pass.
+For every suggested fix, include short ordered steps. Each step must be one concrete action, not a long paragraph.
 
 Return strict JSON only with this shape:
 {
@@ -35,6 +36,7 @@ Return strict JSON only with this shape:
       "type": "code change | configuration fix | dependency update | deployment correction | secret/token fix | workflow yaml fix | infrastructure fix",
       "title": "short fix title",
       "details": "specific actionable fix",
+      "steps": ["step 1", "step 2", "step 3"],
       "files": ["optional affected files"]
     }
   ],
@@ -82,6 +84,7 @@ function normalizeRecommendation(value) {
       type: String(fix.type || "configuration fix"),
       title: String(fix.title || "Suggested fix"),
       details: String(fix.details || fix.suggestedFix || "Review the failed workflow evidence."),
+      steps: Array.isArray(fix.steps) ? fix.steps.map(String).slice(0, 8) : [],
       files: Array.isArray(fix.files) ? fix.files.map(String).slice(0, 8) : []
     }))
     : [];
@@ -113,12 +116,26 @@ function evidenceBasedFallback(payload, error) {
           type: "secret/token fix",
           title: "Verify SonarQube token secret",
           details: "Confirm the GitHub Actions secret used by the workflow, commonly SONAR_TOKEN, exists and contains a valid SonarQube token.",
+          steps: [
+            "Open the GitHub repository settings.",
+            "Go to Secrets and variables, then Actions.",
+            "Confirm SONAR_TOKEN exists and matches the secret name used in the workflow.",
+            "If the token is expired or invalid, regenerate it in SonarQube and update the GitHub secret.",
+            "Rerun the workflow from PipelineIQ."
+          ],
           files: []
         },
         {
           type: "configuration fix",
           title: "Check workflow secret reference",
           details: "Make sure the workflow references the same secret name configured in GitHub repository secrets.",
+          steps: [
+            "Open the workflow YAML file.",
+            "Find the SonarQube analysis step.",
+            "Check the secret reference, for example secrets.SONAR_TOKEN.",
+            "Rename the workflow reference or GitHub secret so both names match.",
+            "Commit the workflow change and rerun the pipeline."
+          ],
           files: [payload.repositoryContext?.workflowPath].filter(Boolean)
         }
       ],
@@ -140,12 +157,26 @@ function evidenceBasedFallback(payload, error) {
           type: "secret/token fix",
           title: "Verify Azure GitHub secrets",
           details: "Check AZURE_CLIENT_ID, AZURE_TENANT_ID, and AZURE_SUBSCRIPTION_ID in GitHub repository secrets.",
+          steps: [
+            "Open the GitHub repository settings.",
+            "Go to Secrets and variables, then Actions.",
+            "Verify AZURE_CLIENT_ID, AZURE_TENANT_ID, and AZURE_SUBSCRIPTION_ID are present.",
+            "Compare the values with the Azure app registration, tenant, and subscription.",
+            "Update incorrect secrets and rerun the workflow."
+          ],
           files: []
         },
         {
           type: "deployment correction",
           title: "Fix Azure federated credential",
           details: "Ensure the Azure app registration exists in the tenant and has a federated credential matching this repository, branch, and workflow.",
+          steps: [
+            "Open the Azure app registration used by the workflow.",
+            "Check Federated credentials.",
+            "Confirm the subject matches the GitHub repo, branch, and workflow.",
+            "Create or correct the federated credential if it is missing.",
+            "Rerun the workflow after saving the Azure configuration."
+          ],
           files: [payload.repositoryContext?.workflowPath].filter(Boolean)
         }
       ],
@@ -167,6 +198,13 @@ function evidenceBasedFallback(payload, error) {
           type: "secret/token fix",
           title: "Validate credentials and permissions",
           details: "Verify the secret values used in the failed step and confirm the identity has permission for the target resource.",
+          steps: [
+            "Identify the failed authentication step from the workflow logs.",
+            "Find the secrets or variables used by that step.",
+            "Verify those values exist in GitHub Actions secrets.",
+            "Confirm the identity has permission to access the target service.",
+            "Rerun the workflow after fixing the credentials."
+          ],
           files: [payload.repositoryContext?.workflowPath].filter(Boolean)
         }
       ],
@@ -187,6 +225,13 @@ function evidenceBasedFallback(payload, error) {
         type: "configuration fix",
         title: "Fix PipelineIQ AI configuration",
         details: `Resolve Gemini configuration error: ${error.message}`,
+        steps: [
+          "Open the PipelineIQ environment configuration.",
+          "Set GEMINI_API_KEY to a valid Google AI Studio API key.",
+          "Set GEMINI_MODEL to a supported model such as gemini-2.5-flash.",
+          "Rebuild and restart gemini-ai-service.",
+          "Retry analysis or run the failed pipeline again."
+        ],
         files: []
       }
     ],

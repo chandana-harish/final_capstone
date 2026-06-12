@@ -448,6 +448,43 @@ dd {
   font-size: 1rem;
 }
 
+.fix-steps {
+  display: grid;
+  gap: 9px;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: fix-step;
+}
+
+.fix-steps li {
+  counter-increment: fix-step;
+  position: relative;
+  min-height: 34px;
+  padding: 7px 8px 7px 42px;
+  border: 1px solid #e2ebef;
+  border-radius: 8px;
+  background: white;
+  color: #2d4050;
+  line-height: 1.5;
+}
+
+.fix-steps li::before {
+  content: counter(fix-step);
+  position: absolute;
+  left: 9px;
+  top: 8px;
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #0d8f83;
+  color: white;
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
 .fix-type {
   width: fit-content;
   border-radius: 999px;

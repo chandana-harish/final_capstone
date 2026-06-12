@@ -101,8 +101,8 @@ function evidenceBasedFallback(payload, error) {
 }
 
 async function callGemini(prompt) {
-  const configuredModel = optionalEnv("GEMINI_MODEL", "gemini-2.0-flash");
-  const models = [...new Set([configuredModel, "gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro-latest"])];
+  const configuredModel = optionalEnv("GEMINI_MODEL", "gemini-2.5-flash");
+  const models = [...new Set([configuredModel, "gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.5-pro", "gemini-flash-latest"])];
   let lastError;
 
   for (const model of models) {

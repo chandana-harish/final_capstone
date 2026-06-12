@@ -162,6 +162,20 @@ function App() {
     }
   }
 
+  async function retryAnalysis() {
+    if (!currentRun?.id) return;
+    setLoading(true);
+    setError("");
+    try {
+      await api(`/api/pipeline-runs/${currentRun.id}/analyze`, { method: "POST" });
+      setAnalysis(null);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   async function logout() {
     await auth("/api/auth/logout", { method: "POST" });
     setUser(null);
@@ -257,6 +271,14 @@ function App() {
               <div><dt>Branch</dt><dd>{currentRun.branch}</dd></div>
               <div><dt>GitHub Run</dt><dd>{currentRun.github_run_id || "Waiting for GitHub run id"}</dd></div>
             </dl>
+          )}
+
+          {currentRun?.conclusion === "failure" && (
+            <div className="action-row">
+              <button className="secondary-action" disabled={loading} onClick={retryAnalysis}>
+                {loading ? "Queuing..." : "Retry Analysis"}
+              </button>
+            </div>
           )}
 
           {analysis?.failure_reason && (

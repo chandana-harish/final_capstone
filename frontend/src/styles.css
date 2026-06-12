@@ -66,7 +66,8 @@ select {
 }
 
 .primary-action,
-.ghost-button {
+.ghost-button,
+.secondary-action {
   min-height: 44px;
   border: 0;
   border-radius: 8px;
@@ -110,6 +111,17 @@ select {
 .ghost-button {
   background: #e9f0f2;
   color: #263541;
+}
+
+.secondary-action {
+  background: #e7f4f7;
+  color: #116476;
+  border: 1px solid #b8dce4;
+}
+
+.secondary-action:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 .app-shell {
@@ -340,6 +352,12 @@ select:focus {
   border-radius: 8px;
   padding: 13px;
   background: #fbfdfe;
+}
+
+.action-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 14px;
 }
 
 dt {

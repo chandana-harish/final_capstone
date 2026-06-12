@@ -4,6 +4,8 @@ PipelineIQ is a separate AKS-hosted platform for running and analyzing GitHub Ac
 
 Users log in with GitHub, select a repository, workflow, and branch, then start that workflow from PipelineIQ. PipelineIQ monitors the workflow run. If the run fails, it fetches the real GitHub Actions jobs and logs, extracts the failed step and error evidence, sends that evidence to Gemini, and shows a failure explanation with suggested fixes.
 
+The enhanced analyzer also collects repository context such as the workflow YAML, commit message, changed files, and common config files like `package.json`, `Dockerfile`, `sonar-project.properties`, and Kubernetes manifests when present. The AI response is structured into code changes, configuration fixes, dependency updates, secret/token fixes, workflow YAML fixes, and deployment corrections.
+
 PipelineIQ does not directly deploy user applications. If the selected GitHub Actions workflow deploys to dev or prod, GitHub Actions performs that deployment. PipelineIQ triggers, monitors, and analyzes the workflow.
 
 ## Stack
@@ -112,4 +114,3 @@ kubectl apply -f k8s/
 ```
 
 Before production, replace `secrets.example.yaml` with real Kubernetes Secrets or Azure Key Vault CSI integration.
-

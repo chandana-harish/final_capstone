@@ -99,5 +99,32 @@ app.get("/internal/users/:userId/repos/:owner/:repo/jobs/:jobId/logs", asyncHand
   res.type("text/plain").send(logs);
 }));
 
+app.get("/internal/users/:userId/repos/:owner/:repo/commits/:sha", asyncHandler(async (req, res) => {
+  const token = await getToken(req.params.userId);
+  const commit = await githubRequest(token, `/repos/${req.params.owner}/${req.params.repo}/commits/${req.params.sha}`);
+  res.json(commit);
+}));
+
+app.get("/internal/users/:userId/repos/:owner/:repo/contents", asyncHandler(async (req, res) => {
+  const token = await getToken(req.params.userId);
+  const path = req.query.path;
+  const ref = req.query.ref;
+  if (!path) return res.status(400).json({ error: "path query parameter is required" });
+
+  const params = new URLSearchParams();
+  if (ref) params.set("ref", ref);
+
+  try {
+    const content = await githubRequest(
+      token,
+      `/repos/${req.params.owner}/${req.params.repo}/contents/${encodeURIComponent(path).replace(/%2F/g, "/")}?${params.toString()}`
+    );
+    res.json(content);
+  } catch (error) {
+    if (error.status === 404) return res.status(404).json({ error: "File not found" });
+    throw error;
+  }
+}));
+
 app.use(errorMiddleware);
 app.listen(port, () => console.log(`github-integration-service listening on ${port}`));

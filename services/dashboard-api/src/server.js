@@ -20,6 +20,12 @@ app.use(express.json());
 app.use(cookieParser());
 health(app, "dashboard-api");
 
+async function ensureSchema() {
+  await query("ALTER TABLE analysis_results ADD COLUMN IF NOT EXISTS repository_context JSONB NOT NULL DEFAULT '{}'");
+  await query("ALTER TABLE ai_recommendations ADD COLUMN IF NOT EXISTS suggested_fixes JSONB NOT NULL DEFAULT '[]'");
+  await query("ALTER TABLE ai_recommendations ADD COLUMN IF NOT EXISTS affected_files JSONB NOT NULL DEFAULT '[]'");
+}
+
 async function serviceJson(url, options = {}) {
   const response = await fetch(url, options);
   const contentType = response.headers.get("content-type") || "";
@@ -91,7 +97,7 @@ app.get("/api/pipeline-runs/:id", requireUser, asyncHandler(async (req, res) => 
 
   const analysis = await query(
     `SELECT ar.*, ai.failure_reason, ai.explanation, ai.possible_root_cause, ai.suggested_fix,
-      ai.risk_score, ai.confidence_level, ai.insufficient_evidence
+      ai.suggested_fixes, ai.affected_files, ai.risk_score, ai.confidence_level, ai.insufficient_evidence
      FROM analysis_results ar
      LEFT JOIN ai_recommendations ai ON ai.analysis_result_id = ar.id
      WHERE ar.pipeline_run_id = $1
@@ -135,4 +141,5 @@ app.get("/api/dashboard/summary", requireUser, asyncHandler(async (req, res) => 
 }));
 
 app.use(errorMiddleware);
+await ensureSchema();
 app.listen(port, () => console.log(`dashboard-api listening on ${port}`));

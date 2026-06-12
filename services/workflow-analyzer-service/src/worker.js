@@ -2,6 +2,10 @@ import { consume, optionalEnv, publish, query } from "@pipelineiq/shared";
 
 const githubServiceUrl = optionalEnv("GITHUB_SERVICE_URL", "http://github-integration-service:8082");
 
+async function ensureSchema() {
+  await query("ALTER TABLE analysis_results ADD COLUMN IF NOT EXISTS repository_context JSONB NOT NULL DEFAULT '{}'");
+}
+
 async function serviceJson(url) {
   const response = await fetch(url);
   const contentType = response.headers.get("content-type") || "";
@@ -52,7 +56,77 @@ function extractEvidence(logText) {
   return matches.slice(0, 40);
 }
 
+function decodeGitHubContent(file) {
+  if (!file?.content || file.encoding !== "base64") return "";
+  return Buffer.from(file.content, "base64").toString("utf8");
+}
+
+function summarizeChangedFiles(commit) {
+  return (commit.files || []).slice(0, 30).map((file) => ({
+    filename: file.filename,
+    status: file.status,
+    additions: file.additions,
+    deletions: file.deletions,
+    changes: file.changes,
+    patch: file.patch ? file.patch.slice(0, 1800) : ""
+  }));
+}
+
+async function optionalServiceJson(url, fallback = null) {
+  try {
+    return await serviceJson(url);
+  } catch {
+    return fallback;
+  }
+}
+
+async function collectRepositoryContext(payload, run) {
+  const ref = encodeURIComponent(run.head_sha || run.head_branch || "");
+  const base = `${githubServiceUrl}/internal/users/${payload.userId}/repos/${payload.owner}/${payload.repo}`;
+  const commit = run.head_sha
+    ? await optionalServiceJson(`${base}/commits/${run.head_sha}`)
+    : null;
+
+  const workflowPath = run.path || "";
+  const workflowFile = workflowPath
+    ? await optionalServiceJson(`${base}/contents?path=${encodeURIComponent(workflowPath)}&ref=${ref}`)
+    : null;
+
+  const commonPaths = [
+    "package.json",
+    "package-lock.json",
+    "Dockerfile",
+    "docker-compose.yml",
+    "requirements.txt",
+    "pom.xml",
+    "build.gradle",
+    "sonar-project.properties",
+    "k8s/deployment.yaml",
+    "k8s/service.yaml"
+  ];
+
+  const configFiles = [];
+  for (const path of commonPaths) {
+    const file = await optionalServiceJson(`${base}/contents?path=${encodeURIComponent(path)}&ref=${ref}`);
+    if (file?.content) {
+      configFiles.push({
+        path,
+        content: decodeGitHubContent(file).slice(0, 4000)
+      });
+    }
+  }
+
+  return {
+    workflowPath,
+    workflowYaml: decodeGitHubContent(workflowFile).slice(0, 8000),
+    commitMessage: commit?.commit?.message || run.head_commit?.message || "",
+    changedFiles: commit ? summarizeChangedFiles(commit) : [],
+    configFiles
+  };
+}
+
 async function analyze(payload) {
+  const run = await serviceJson(`${githubServiceUrl}/internal/users/${payload.userId}/repos/${payload.owner}/${payload.repo}/runs/${payload.githubRunId}`);
   const jobsPayload = await serviceJson(`${githubServiceUrl}/internal/users/${payload.userId}/repos/${payload.owner}/${payload.repo}/runs/${payload.githubRunId}/jobs`);
   const failedJob = jobsPayload.jobs?.find((job) => job.conclusion === "failure") || jobsPayload.jobs?.find((job) => job.status === "completed");
   if (!failedJob) {
@@ -71,10 +145,11 @@ async function analyze(payload) {
   const importantLogLines = extractEvidence(logText);
   const category = classifyFailure(importantLogLines);
   const errorSummary = importantLogLines.slice(0, 8).join("\n") || "No clear error lines found in the workflow log.";
+  const repositoryContext = await collectRepositoryContext(payload, run);
 
   const result = await query(
-    `INSERT INTO analysis_results (pipeline_run_id, failed_job, failed_step, category, error_summary, important_log_lines)
-     VALUES ($1, $2, $3, $4, $5, $6)
+    `INSERT INTO analysis_results (pipeline_run_id, failed_job, failed_step, category, error_summary, important_log_lines, repository_context)
+     VALUES ($1, $2, $3, $4, $5, $6, $7)
      RETURNING *`,
     [
       payload.pipelineRunId,
@@ -82,7 +157,8 @@ async function analyze(payload) {
       failedStep?.name || "Unknown failed step",
       category,
       errorSummary,
-      JSON.stringify(importantLogLines)
+      JSON.stringify(importantLogLines),
+      JSON.stringify(repositoryContext)
     ]
   );
 
@@ -97,9 +173,11 @@ async function analyze(payload) {
     failedStep: failedStep?.name || "Unknown failed step",
     category,
     errorSummary,
-    importantLogLines
+    importantLogLines,
+    repositoryContext
   });
 }
 
+await ensureSchema();
 await consume("pipeline.analyze", analyze);
 console.log("workflow-analyzer-service consuming pipeline.analyze");

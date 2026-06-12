@@ -70,6 +70,7 @@ CREATE TABLE IF NOT EXISTS analysis_results (
   category TEXT,
   error_summary TEXT,
   important_log_lines JSONB NOT NULL DEFAULT '[]',
+  repository_context JSONB NOT NULL DEFAULT '{}',
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
@@ -80,6 +81,8 @@ CREATE TABLE IF NOT EXISTS ai_recommendations (
   explanation TEXT NOT NULL,
   possible_root_cause TEXT,
   suggested_fix TEXT NOT NULL,
+  suggested_fixes JSONB NOT NULL DEFAULT '[]',
+  affected_files JSONB NOT NULL DEFAULT '[]',
   risk_score INTEGER NOT NULL CHECK (risk_score >= 0 AND risk_score <= 100),
   confidence_level TEXT NOT NULL,
   insufficient_evidence BOOLEAN NOT NULL DEFAULT FALSE,

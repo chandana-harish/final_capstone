@@ -45,6 +45,34 @@ function EmptyState() {
   );
 }
 
+function asArray(value) {
+  if (Array.isArray(value)) return value;
+  if (!value) return [];
+  try {
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function FixCard({ fix }) {
+  return (
+    <div className="fix-card">
+      <div className="fix-card-top">
+        <span className="fix-type">{fix.type || "fix"}</span>
+        <h4>{fix.title || "Suggested fix"}</h4>
+      </div>
+      <p>{fix.details}</p>
+      {fix.files?.length > 0 && (
+        <div className="file-list">
+          {fix.files.map((file) => <span key={file}>{file}</span>)}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function Login() {
   return (
     <main className="login-shell">
@@ -75,6 +103,7 @@ function App() {
   const [summary, setSummary] = useState(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [analysisRefresh, setAnalysisRefresh] = useState(0);
 
   const selectedRepo = useMemo(
     () => repos.find((repo) => repo.id === selectedRepoId),
@@ -84,6 +113,8 @@ function App() {
     () => workflows.find((workflow) => String(workflow.id) === selectedWorkflowId),
     [workflows, selectedWorkflowId]
   );
+  const suggestedFixes = useMemo(() => asArray(analysis?.suggested_fixes), [analysis]);
+  const affectedFiles = useMemo(() => asArray(analysis?.affected_files), [analysis]);
 
   useEffect(() => {
     auth("/api/auth/me")
@@ -138,7 +169,7 @@ function App() {
       }
     }, 5000);
     return () => clearInterval(interval);
-  }, [currentRun?.id]);
+  }, [currentRun?.id, analysisRefresh]);
 
   async function runPipeline() {
     if (!selectedRepo || !selectedWorkflowId || !selectedBranch) return;
@@ -169,6 +200,7 @@ function App() {
     try {
       await api(`/api/pipeline-runs/${currentRun.id}/analyze`, { method: "POST" });
       setAnalysis(null);
+      setAnalysisRefresh((value) => value + 1);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -297,8 +329,22 @@ function App() {
                   <p>{analysis.possible_root_cause}</p>
                 </>
               )}
-              <h3>Suggested Fix</h3>
-              <p>{analysis.suggested_fix}</p>
+              <h3>Recommended Fixes</h3>
+              {suggestedFixes.length > 0 ? (
+                <div className="fix-grid">
+                  {suggestedFixes.map((fix, index) => <FixCard key={`${fix.title || "fix"}-${index}`} fix={fix} />)}
+                </div>
+              ) : (
+                <p>{analysis.suggested_fix}</p>
+              )}
+              {affectedFiles.length > 0 && (
+                <>
+                  <h3>Affected Files</h3>
+                  <div className="file-list large">
+                    {affectedFiles.map((file) => <span key={file}>{file}</span>)}
+                  </div>
+                </>
+              )}
             </div>
           )}
 

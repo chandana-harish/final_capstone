@@ -5,8 +5,11 @@ metadata:
   namespace: pipelineiq
 data:
   NODE_ENV: "production"
-  FRONTEND_URL: "https://pipelineiq.example.com"
-  PUBLIC_API_BASE_URL: "https://pipelineiq.example.com"
+
+  FRONTEND_URL: "http://20.204.214.44"
+  PUBLIC_API_BASE_URL: "http://20.204.214.44"
+  PUBLIC_AUTH_BASE_URL: "http://20.204.214.44"
+
   AUTH_SERVICE_URL: "http://auth-service:8081"
   DASHBOARD_API_URL: "http://dashboard-api:8080"
   GITHUB_SERVICE_URL: "http://github-integration-service:8082"
@@ -14,7 +17,8 @@ data:
   ANALYZER_SERVICE_URL: "http://workflow-analyzer-service:8084"
   GEMINI_SERVICE_URL: "http://gemini-ai-service:8085"
   NOTIFICATION_SERVICE_URL: "http://notification-service:8086"
-  GITHUB_CALLBACK_URL: "https://pipelineiq.example.com/api/auth/github/callback"
+
+  GITHUB_CALLBACK_URL: "http://20.204.214.44/api/auth/github/callback"
   GEMINI_MODEL: "gemini-2.5-flash"
   RABBITMQ_URL: "amqp://rabbitmq:5672"
   SMTP_PORT: "587"

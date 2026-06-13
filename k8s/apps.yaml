@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: pipelineiq.azurecr.io/pipelineiq-frontend:latest
+          image: nimeshsv814/final_capstone-frontend:latest  
           ports:
             - containerPort: 80
           resources:
@@ -55,7 +55,7 @@ spec:
     spec:
       containers:
         - name: auth-service
-          image: pipelineiq.azurecr.io/auth-service:latest
+          image: nimeshsv814/final_capstone-auth-service:latest
           ports:
             - containerPort: 8081
           envFrom:
@@ -108,8 +108,7 @@ spec:
     spec:
       containers:
         - name: dashboard-api
-          image: pipelineiq.azurecr.io/dashboard-api:latest
-          ports:
+          image: nimeshsv814/final_capstone-dashboard-api:latest
             - containerPort: 8080
           envFrom:
             - configMapRef:
@@ -154,7 +153,7 @@ spec:
     spec:
       containers:
         - name: github-integration-service
-          image: pipelineiq.azurecr.io/github-integration-service:latest
+          image: nimeshsv814/final_capstone-github-integration-service:latest
           ports:
             - containerPort: 8082
           envFrom:
@@ -200,7 +199,7 @@ spec:
     spec:
       containers:
         - name: pipeline-runner-service
-          image: pipelineiq.azurecr.io/pipeline-runner-service:latest
+          image: nimeshsv814/final_capstone-pipeline-runner-service:latest
           envFrom:
             - configMapRef:
                 name: pipelineiq-config
@@ -224,7 +223,7 @@ spec:
     spec:
       containers:
         - name: workflow-analyzer-service
-          image: pipelineiq.azurecr.io/workflow-analyzer-service:latest
+          image: nimeshsv814/final_capstone-workflow-analyzer-service:latest  
           envFrom:
             - configMapRef:
                 name: pipelineiq-config
@@ -248,7 +247,7 @@ spec:
     spec:
       containers:
         - name: gemini-ai-service
-          image: pipelineiq.azurecr.io/gemini-ai-service:latest
+          image: nimeshsv814/final_capstone-gemini-ai-service:latest
           envFrom:
             - configMapRef:
                 name: pipelineiq-config
@@ -272,7 +271,7 @@ spec:
     spec:
       containers:
         - name: webhook-service
-          image: pipelineiq.azurecr.io/webhook-service:latest
+          image: nimeshsv814/final_capstone-webhook-service:latest      
           ports:
             - containerPort: 8087
           envFrom:
@@ -318,7 +317,7 @@ spec:
     spec:
       containers:
         - name: notification-service
-          image: pipelineiq.azurecr.io/notification-service:latest
+          image: nimeshsv814/final_capstone-notification-service:latest
           envFrom:
             - configMapRef:
                 name: pipelineiq-config

@@ -4,7 +4,7 @@ metadata:
   name: pipelineiq-config
   namespace: pipelineiq
 data:
-  NODE_ENV: "production"
+  NODE_ENV: "development"
 
   FRONTEND_URL: "http://20.204.214.44"
   PUBLIC_API_BASE_URL: "http://20.204.214.44"

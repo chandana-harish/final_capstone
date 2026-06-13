@@ -141,5 +141,9 @@ app.get("/api/dashboard/summary", requireUser, asyncHandler(async (req, res) => 
 }));
 
 app.use(errorMiddleware);
-await ensureSchema();
-app.listen(port, () => console.log(`dashboard-api listening on ${port}`));
+app.listen(port, () => {
+  console.log(`dashboard-api listening on ${port}`);
+  ensureSchema().catch((error) => {
+    console.error("dashboard-api schema migration failed", error);
+  });
+});

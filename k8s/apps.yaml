@@ -109,6 +109,7 @@ spec:
       containers:
         - name: dashboard-api
           image: nimeshsv814/final_capstone-dashboard-api:latest
+          ports:
             - containerPort: 8080
           envFrom:
             - configMapRef:
@@ -323,4 +324,3 @@ spec:
                 name: pipelineiq-config
             - secretRef:
                 name: pipelineiq-secrets
-

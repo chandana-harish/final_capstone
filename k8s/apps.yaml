@@ -108,7 +108,7 @@ spec:
     spec:
       containers:
         - name: dashboard-api
-          image: nimeshsv814/final_capstone-dashboard-api:v1.0.0
+          image: nimeshsv814/final_capstone-dashboard-api:v1.0.2
           ports:
             - containerPort: 8080
           envFrom:

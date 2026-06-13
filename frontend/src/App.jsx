@@ -2,8 +2,8 @@ import React, { useEffect, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./styles.css";
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "";
-const AUTH_BASE = import.meta.env.VITE_AUTH_BASE_URL ?? "";
+const API_BASE = "";
+const AUTH_BASE = "";
 
 async function api(path, options = {}) {
   const response = await fetch(`${API_BASE}${path}`, {

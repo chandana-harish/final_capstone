@@ -252,7 +252,7 @@ spec:
     spec:
       containers:
         - name: gemini-ai-service
-          image: nimeshsv814/final_capstone-gemini-ai-service:latest
+          image: nimeshsv814/final_capstone-gemini-ai-service:v1.0.0
           envFrom:
             - configMapRef:
                 name: pipelineiq-config

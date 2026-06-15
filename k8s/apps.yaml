@@ -62,7 +62,7 @@ spec:
             - configMapRef:
                 name: pipelineiq-config
             - secretRef:
-                name: pipelineiq-secrets
+                name: pipelineiq-kv-secrets
           readinessProbe:
             httpGet:
               path: /health
@@ -115,7 +115,7 @@ spec:
             - configMapRef:
                 name: pipelineiq-config
             - secretRef:
-                name: pipelineiq-secrets
+                name: pipelineiq-kv-secrets
           readinessProbe:
             httpGet:
               path: /health
@@ -165,7 +165,7 @@ spec:
             - configMapRef:
                 name: pipelineiq-config
             - secretRef:
-                name: pipelineiq-secrets
+                name: pipelineiq-kv-secrets
           readinessProbe:
             httpGet:
               path: /health
@@ -209,7 +209,7 @@ spec:
             - configMapRef:
                 name: pipelineiq-config
             - secretRef:
-                name: pipelineiq-secrets
+                name: pipelineiq-kv-secrets
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -233,7 +233,7 @@ spec:
             - configMapRef:
                 name: pipelineiq-config
             - secretRef:
-                name: pipelineiq-secrets
+                name: pipelineiq-kv-secrets
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -257,7 +257,7 @@ spec:
             - configMapRef:
                 name: pipelineiq-config
             - secretRef:
-                name: pipelineiq-secrets
+                name: pipelineiq-kv-secrets
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -283,7 +283,7 @@ spec:
             - configMapRef:
                 name: pipelineiq-config
             - secretRef:
-                name: pipelineiq-secrets
+                name: pipelineiq-kv-secrets
           readinessProbe:
             httpGet:
               path: /health
@@ -327,4 +327,4 @@ spec:
             - configMapRef:
                 name: pipelineiq-config
             - secretRef:
-                name: pipelineiq-secrets
+                name: pipelineiq-kv-secrets

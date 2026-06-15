@@ -258,6 +258,17 @@ spec:
                 name: pipelineiq-config
             - secretRef:
                 name: pipelineiq-kv-secrets
+          volumeMounts:
+            - name: keyvault-secrets
+              mountPath: "/mnt/secrets-store"
+              readOnly: true
+      volumes:
+        - name: keyvault-secrets
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: pipelineiq-keyvault-secrets
 ---
 apiVersion: apps/v1
 kind: Deployment

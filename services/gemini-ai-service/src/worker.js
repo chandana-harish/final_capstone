@@ -104,6 +104,7 @@ function normalizeRecommendation(value) {
 
 function evidenceBasedFallback(payload, error) {
   const evidence = `${payload.errorSummary}\n${payload.importantLogLines.join("\n")}`.toLowerCase();
+  const provider = optionalEnv("AI_PROVIDER", "gemini");
 
   if (evidence.includes("sonar") && (evidence.includes("token") || evidence.includes("unauthorized") || evidence.includes("not authorized") || evidence.includes("authentication") || evidence.includes("401"))) {
     return {
@@ -217,21 +218,30 @@ function evidenceBasedFallback(payload, error) {
 
   return {
     failureReason: "AI analysis unavailable",
-    explanation: "PipelineIQ detected the failed workflow, but Gemini could not run because the AI service is not configured correctly.",
+    explanation: "PipelineIQ detected the failed workflow, but the configured AI provider could not run.",
     possibleRootCause: payload.category || "Unknown",
-    suggestedFix: `Fix the PipelineIQ Gemini configuration first: ${error.message}. After GEMINI_API_KEY and GEMINI_MODEL are correct, rerun this pipeline so Gemini can analyze the actual failure evidence.`,
+    suggestedFix: `Fix the PipelineIQ AI configuration first: ${error.message}. After the ${provider} settings are correct, rerun this pipeline so AI can analyze the actual failure evidence.`,
     suggestedFixes: [
       {
         type: "configuration fix",
         title: "Fix PipelineIQ AI configuration",
-        details: `Resolve Gemini configuration error: ${error.message}`,
-        steps: [
-          "Open the PipelineIQ environment configuration.",
-          "Set GEMINI_API_KEY to a valid Google AI Studio API key.",
-          "Set GEMINI_MODEL to a supported model such as gemini-2.5-flash.",
-          "Rebuild and restart gemini-ai-service.",
-          "Retry analysis or run the failed pipeline again."
-        ],
+        details: `Resolve ${provider} configuration error: ${error.message}`,
+        steps: provider === "azure-foundry"
+          ? [
+            "Open the PipelineIQ environment configuration.",
+            "Set AI_PROVIDER to azure-foundry.",
+            "Set AZURE_OPENAI_ENDPOINT to the Azure AI Foundry OpenAI endpoint.",
+            "Set AZURE_OPENAI_DEPLOYMENT to the deployed model name.",
+            "Make sure AZURE_OPENAI_API_KEY is available from Key Vault.",
+            "Restart gemini-ai-service and retry analysis."
+          ]
+          : [
+            "Open the PipelineIQ environment configuration.",
+            "Set GEMINI_API_KEY to a valid Google AI Studio API key.",
+            "Set GEMINI_MODEL to a supported model such as gemini-2.5-flash.",
+            "Restart gemini-ai-service.",
+            "Retry analysis or run the failed pipeline again."
+          ],
         files: []
       }
     ],
@@ -279,16 +289,65 @@ async function callGemini(prompt) {
   throw lastError || new Error("Gemini API request failed for all configured models");
 }
 
-async function analyzeWithGemini(payload) {
+async function callAzureFoundry(prompt) {
+  const deployment = requireEnv("AZURE_OPENAI_DEPLOYMENT");
+  const endpoint = requireEnv("AZURE_OPENAI_ENDPOINT").replace(/\/+$/, "");
+  const apiVersion = optionalEnv("AZURE_OPENAI_API_VERSION", "2024-10-21");
+  const url = endpoint.includes("/openai/deployments/")
+    ? new URL(endpoint)
+    : new URL(`${endpoint}/openai/deployments/${encodeURIComponent(deployment)}/chat/completions`);
+
+  if (!url.searchParams.has("api-version")) {
+    url.searchParams.set("api-version", apiVersion);
+  }
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "api-key": requireEnv("AZURE_OPENAI_API_KEY")
+    },
+    body: JSON.stringify({
+      messages: [
+        {
+          role: "system",
+          content: "You are PipelineIQ, an AI DevOps failure analysis agent. Return strict JSON only."
+        },
+        { role: "user", content: prompt }
+      ],
+      temperature: 0.2
+    })
+  });
+
+  const body = await response.json();
+  if (!response.ok) {
+    throw new Error(body.error?.message || "Azure AI Foundry request failed");
+  }
+
+  const text = body.choices?.[0]?.message?.content;
+  if (!text) throw new Error("Azure AI Foundry response did not include text content");
+  return normalizeRecommendation(parseJsonResponse(text));
+}
+
+async function callAiProvider(prompt) {
+  const provider = optionalEnv("AI_PROVIDER", "gemini").toLowerCase();
+  if (provider === "azure-foundry" || provider === "azure_openai" || provider === "azure-openai") {
+    return callAzureFoundry(prompt);
+  }
+
+  return callGemini(prompt);
+}
+
+async function analyzeWithAi(payload) {
   const runResult = await query("SELECT * FROM pipeline_runs WHERE id = $1", [payload.pipelineRunId]);
   const run = runResult.rows[0];
   if (!run) throw new Error("Pipeline run not found for AI analysis");
 
   let recommendation;
   try {
-    recommendation = await callGemini(buildPrompt(payload, run));
+    recommendation = await callAiProvider(buildPrompt(payload, run));
   } catch (error) {
-    console.error("Gemini analysis failed", error);
+    console.error("AI analysis failed", error);
     recommendation = evidenceBasedFallback(payload, error);
   }
 
@@ -320,5 +379,5 @@ async function analyzeWithGemini(payload) {
 }
 
 await ensureSchema();
-await consume("pipeline.ai", analyzeWithGemini);
-console.log("gemini-ai-service consuming pipeline.ai");
+await consume("pipeline.ai", analyzeWithAi);
+console.log(`gemini-ai-service consuming pipeline.ai with ${optionalEnv("AI_PROVIDER", "gemini")}`);

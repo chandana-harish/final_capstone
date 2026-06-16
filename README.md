@@ -14,11 +14,11 @@ PipelineIQ does not directly deploy user applications. If the selected GitHub Ac
 - Backend: Node.js + Express
 - Auth: GitHub OAuth + JWT cookie
 - GitHub: REST API for repositories, workflows, dispatches, runs, jobs, and logs
-- AI: Gemini API
+- AI: Gemini API or Azure AI Foundry / Azure OpenAI
 - Database: PostgreSQL
 - Queue: RabbitMQ
 - Runtime: Docker containers on AKS
-- Ingress: NGINX Ingress Controller
+- Gateway: Kubernetes Gateway API via kgateway
 - Secrets: Kubernetes Secrets or Azure Key Vault CSI Driver
 
 ## Services
@@ -104,13 +104,15 @@ Dashboard shows failure reason, risk score, confidence, and fix
 
 ## AKS Deployment
 
-Build and push service images to Azure Container Registry, then apply manifests:
+Build and push service images, then apply manifests:
 
 ```bash
 kubectl apply -f k8s/namespace.yaml
 kubectl apply -f k8s/configmap.yaml
 kubectl apply -f k8s/secrets.example.yaml
 kubectl apply -f k8s/
+kubectl apply -f k8s/kgateway/
 ```
 
 Before production, replace `secrets.example.yaml` with real Kubernetes Secrets or Azure Key Vault CSI integration.
+PipelineIQ now uses `kgateway` as the external entry layer instead of a Kubernetes `Ingress` object.

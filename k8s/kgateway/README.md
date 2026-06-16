@@ -1,8 +1,8 @@
-# kgateway Migration Plan
+# kgateway Deployment
 
-This folder adds a safe `kgateway` migration path for PipelineIQ.
+This folder is the active external routing setup for PipelineIQ.
 
-It does **not** remove the current `Ingress` and does **not** change live traffic by itself.
+PipelineIQ now uses `kgateway` and Kubernetes Gateway API as the single north-south traffic path.
 Apply these resources only after `kgateway` is installed in the cluster.
 
 ## What is here
@@ -10,7 +10,7 @@ Apply these resources only after `kgateway` is installed in the cluster.
 - `namespace.yaml`
   - Dedicated namespace for the kgateway control plane
 - `gateway.yaml`
-  - The new Gateway API entry point for PipelineIQ
+  - The Gateway API entry point for PipelineIQ
 - `frontend-route.yaml`
   - Routes `/` to the frontend service
 - `auth-route.yaml`
@@ -22,7 +22,7 @@ Apply these resources only after `kgateway` is installed in the cluster.
 - `kustomization.yaml`
   - Lets you apply the whole folder together
 
-## Safe rollout order
+## Deployment order
 
 1. Install `kgateway` in AKS first.
 2. Confirm a `GatewayClass` named `kgateway` exists:
@@ -45,17 +45,16 @@ Apply these resources only after `kgateway` is installed in the cluster.
    ```
 
 5. Wait for the gateway service/public IP created by kgateway/Envoy.
-6. Test the new endpoint before deleting `k8s/ingress.yaml`.
-7. Update GitHub OAuth callback URL only after the new gateway IP or DNS is confirmed.
+6. Update GitHub OAuth callback URL only after the gateway IP or DNS is confirmed.
 
 ## Important notes
 
 - `gatewayClassName: kgateway` assumes the installed controller exposes that class name.
   If your installed class name is different, update `gateway.yaml`.
 - These resources intentionally do not set `hostnames`, so you can test with an IP first.
-- Keep the current NGINX ingress until all tests pass.
+- These manifests are intended to replace the old NGINX ingress path.
 
-## Cutover checklist
+## Validation checklist
 
 After the kgateway public IP or DNS is ready:
 
@@ -81,8 +80,14 @@ After the kgateway public IP or DNS is ready:
    - repo fetch works
    - pipeline trigger works
    - failure analysis works
-5. Only then remove old ingress:
+5. Remove the old ingress object:
 
    ```bash
-   kubectl delete -f k8s/ingress.yaml
+   kubectl delete ingress pipelineiq-ingress -n pipelineiq --ignore-not-found
+   ```
+
+6. If you are fully done with NGINX ingress, remove the controller namespace too:
+
+   ```bash
+   kubectl delete namespace ingress-nginx --ignore-not-found
    ```

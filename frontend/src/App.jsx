@@ -14,8 +14,14 @@ async function api(path, options = {}) {
     },
     ...options
   });
-  const body = await response.json();
-  if (!response.ok) throw new Error(body.error || "Request failed");
+  const contentType = response.headers.get("content-type") || "";
+  const body = contentType.includes("application/json")
+    ? await response.json()
+    : await response.text();
+  if (!response.ok) {
+    const message = typeof body === "string" ? body : body.error || "Request failed";
+    throw new Error(message);
+  }
   return body;
 }
 
@@ -25,8 +31,14 @@ async function auth(path, options = {}) {
     headers: { "Content-Type": "application/json" },
     ...options
   });
-  const body = await response.json();
-  if (!response.ok) throw new Error(body.error || "Request failed");
+  const contentType = response.headers.get("content-type") || "";
+  const body = contentType.includes("application/json")
+    ? await response.json()
+    : await response.text();
+  if (!response.ok) {
+    const message = typeof body === "string" ? body : body.error || "Request failed";
+    throw new Error(message);
+  }
   return body;
 }
 

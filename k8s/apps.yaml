@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: nimeshsv814/final_capstone-frontend:v1.0.3
+          image: nimeshsv814/final_capstone-frontend:v1.0.4
           ports:
             - containerPort: 80
           resources:
@@ -158,7 +158,7 @@ spec:
     spec:
       containers:
         - name: github-integration-service
-          image: nimeshsv814/final_capstone-github-integration-service:latest
+          image: nimeshsv814/final_capstone-github-integration-service:v1.0.0
           ports:
             - containerPort: 8082
           envFrom:

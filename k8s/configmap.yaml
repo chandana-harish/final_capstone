@@ -6,9 +6,9 @@ metadata:
 data:
   NODE_ENV: "development"
 
-  FRONTEND_URL: "http://4.187.142.246 "
-  PUBLIC_API_BASE_URL: "http://4.187.142.246 "
-  PUBLIC_AUTH_BASE_URL: "http://4.187.142.246 "
+  FRONTEND_URL: "http://4.187.142.246"
+  PUBLIC_API_BASE_URL: "http://4.187.142.246"
+  PUBLIC_AUTH_BASE_URL: "http://4.187.142.246"
 
   AUTH_SERVICE_URL: "http://auth-service:8081"
   DASHBOARD_API_URL: "http://dashboard-api:8080"

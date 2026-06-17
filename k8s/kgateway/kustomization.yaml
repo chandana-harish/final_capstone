@@ -3,6 +3,7 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - gateway.yaml
+  - gateway-service.yaml
   - frontend-route.yaml
   - auth-route.yaml
   - dashboard-route.yaml

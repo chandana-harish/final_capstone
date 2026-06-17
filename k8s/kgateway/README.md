@@ -11,6 +11,8 @@ Apply these resources only after `kgateway` is installed in the cluster.
   - Dedicated namespace for the kgateway control plane
 - `gateway.yaml`
   - The Gateway API entry point for PipelineIQ
+- `gateway-service.yaml`
+  - Repo-managed LoadBalancer service override for the gateway, including the public IP to reuse
 - `frontend-route.yaml`
   - Routes `/` to the frontend service
 - `auth-route.yaml`
@@ -44,7 +46,12 @@ Apply these resources only after `kgateway` is installed in the cluster.
    kubectl get httproute -n pipelineiq
    ```
 
-5. Wait for the gateway service/public IP created by kgateway/Envoy.
+5. Apply the repo-managed gateway service override and wait for the public IP:
+
+   ```bash
+   kubectl apply -k k8s/kgateway
+   kubectl get svc pipelineiq-gateway -n pipelineiq -w
+   ```
 6. Update GitHub OAuth callback URL only after the gateway IP or DNS is confirmed.
 
 ## Important notes
@@ -53,6 +60,7 @@ Apply these resources only after `kgateway` is installed in the cluster.
   If your installed class name is different, update `gateway.yaml`.
 - These resources intentionally do not set `hostnames`, so you can test with an IP first.
 - These manifests are intended to replace the old NGINX ingress path.
+- If you need to reuse a different Azure public IP, update `loadBalancerIP` in `gateway-service.yaml`.
 
 ## Validation checklist
 

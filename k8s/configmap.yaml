@@ -24,7 +24,7 @@ data:
   AI_FALLBACK_PROVIDER: "gemini"
   GEMINI_MODEL: "gemini-2.5-flash"
   AZURE_OPENAI_ENDPOINT: "https://kavyah278-8520-resource.openai.azure.com"
-  AZURE_OPENAI_DEPLOYMENT: "gpt-4.1-mini"
+  AZURE_OPENAI_DEPLOYMENT: "gpt-4o-mini"
   AZURE_OPENAI_API_VERSION: "2024-10-21"
   RABBITMQ_URL: "amqp://rabbitmq:5672"
   SMTP_PORT: "587"

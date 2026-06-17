@@ -7,7 +7,7 @@ metadata:
     kubernetes.io/ingress.class: azure/application-gateway
     appgw.ingress.kubernetes.io/backend-path-prefix: "/"
 spec:
-  ingressClassName: azure-application-gateway
+  ingressClassName: agw
   rules:
     - http:
         paths:

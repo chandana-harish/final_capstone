@@ -20,6 +20,8 @@ data:
 
   GITHUB_CALLBACK_URL: "http://4.224.238.154/api/auth/github/callback"
   AI_PROVIDER: "azure-foundry"
+  AI_FALLBACK_ENABLED: "true"
+  AI_FALLBACK_PROVIDER: "gemini"
   GEMINI_MODEL: "gemini-2.5-flash"
   AZURE_OPENAI_ENDPOINT: "https://kavyah278-8520-resource.openai.azure.com"
   AZURE_OPENAI_DEPLOYMENT: "gpt-4.1-mini"

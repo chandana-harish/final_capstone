@@ -78,6 +78,31 @@ function parseJsonResponse(text) {
   return JSON.parse(cleaned);
 }
 
+function isRetryableAiProviderError(error) {
+  const message = String(error?.message || "").toLowerCase();
+  return [
+    "invalid subscription key",
+    "wrong api endpoint",
+    "api request failed",
+    "timeout",
+    "timed out",
+    "econnrefused",
+    "enotfound",
+    "rate limit",
+    "quota",
+    "too many requests",
+    "service unavailable",
+    "bad gateway",
+    "gateway timeout",
+    "temporarily unavailable",
+    "429",
+    "500",
+    "502",
+    "503",
+    "504"
+  ].some((token) => message.includes(token));
+}
+
 function normalizeRecommendation(value) {
   const suggestedFixes = Array.isArray(value.suggestedFixes)
     ? value.suggestedFixes.slice(0, 6).map((fix) => ({
@@ -330,12 +355,33 @@ async function callAzureFoundry(prompt) {
 }
 
 async function callAiProvider(prompt) {
-  const provider = optionalEnv("AI_PROVIDER", "gemini").toLowerCase();
-  if (provider === "azure-foundry" || provider === "azure_openai" || provider === "azure-openai") {
-    return callAzureFoundry(prompt);
-  }
+  const primaryProvider = optionalEnv("AI_PROVIDER", "gemini").toLowerCase();
+  const fallbackEnabled = optionalEnv("AI_FALLBACK_ENABLED", "false").toLowerCase() === "true";
+  const fallbackProvider = optionalEnv("AI_FALLBACK_PROVIDER", "gemini").toLowerCase();
 
-  return callGemini(prompt);
+  try {
+    if (primaryProvider === "azure-foundry" || primaryProvider === "azure_openai" || primaryProvider === "azure-openai") {
+      return callAzureFoundry(prompt);
+    }
+
+    return callGemini(prompt);
+  } catch (primaryError) {
+    if (!fallbackEnabled || fallbackProvider === primaryProvider || !isRetryableAiProviderError(primaryError)) {
+      throw primaryError;
+    }
+
+    console.warn(`Primary AI provider failed: ${primaryProvider}. Attempting fallback provider: ${fallbackProvider}.`, primaryError.message);
+
+    if (fallbackProvider === "azure-foundry" || fallbackProvider === "azure_openai" || fallbackProvider === "azure-openai") {
+      return callAzureFoundry(prompt);
+    }
+
+    if (fallbackProvider === "gemini") {
+      return callGemini(prompt);
+    }
+
+    throw primaryError;
+  }
 }
 
 async function analyzeWithAi(payload) {

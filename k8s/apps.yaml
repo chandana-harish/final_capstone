@@ -55,7 +55,7 @@ spec:
     spec:
       containers:
         - name: auth-service
-          image: nimeshsv814/final_capstone-auth-service:v1.0.2
+          image: nimeshsv814/final_capstone-auth-service:v1.0.3
           ports:
             - containerPort: 8081
           envFrom:

@@ -4,9 +4,15 @@ import { requireEnv } from "./config.js";
 
 export function signSession(user) {
   return jwt.sign(
-    { sub: user.id, githubUserId: user.github_user_id, username: user.username },
+    {
+      sub: user.id,
+      githubUserId: user.github_user_id,
+      entraUserId: user.entra_user_id,
+      username: user.username,
+      authProvider: user.auth_provider || "github"
+    },
     requireEnv("JWT_SECRET"),
-    { expiresIn: "8h" }
+    { expiresIn: process.env.SESSION_TTL || "8h" }
   );
 }
 
@@ -52,4 +58,3 @@ export function decryptToken(payload) {
   decipher.setAuthTag(tag);
   return Buffer.concat([decipher.update(encrypted), decipher.final()]).toString("utf8");
 }
-

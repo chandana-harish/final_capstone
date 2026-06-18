@@ -19,6 +19,11 @@ data:
   NOTIFICATION_SERVICE_URL: "http://notification-service:8086"
 
   GITHUB_CALLBACK_URL: "http://9.223.144.24/api/auth/github/callback"
+  AUTH_PROVIDER: "github"
+  ENTRA_TENANT_ID: "replace-me"
+  ENTRA_CLIENT_ID: "replace-me"
+  ENTRA_CALLBACK_URL: "http://9.223.144.24/api/auth/entra/callback"
+  SESSION_TTL: "8h"
   AI_PROVIDER: "azure-foundry"
   AI_FALLBACK_ENABLED: "true"
   AI_FALLBACK_PROVIDER: "gemini"

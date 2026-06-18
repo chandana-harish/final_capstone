@@ -101,8 +101,11 @@ function Login() {
           <h1>AI Powered Pipeline Intelligence</h1>
           <p className="login-copy">Trigger real workflows, watch their status, and turn failed logs into clear remediation steps.</p>
         </div>
-        <a className="primary-action" href={`${AUTH_BASE}/api/auth/github`}>
-          Login with GitHub
+        <a className="primary-action" href={`${AUTH_BASE}/api/auth/entra`}>
+          Login with Microsoft
+        </a>
+        <a className="legacy-login" href={`${AUTH_BASE}/api/auth/github`}>
+          Continue with GitHub fallback
         </a>
       </section>
     </main>
@@ -120,6 +123,7 @@ function App() {
   const [currentRun, setCurrentRun] = useState(null);
   const [analysis, setAnalysis] = useState(null);
   const [summary, setSummary] = useState(null);
+  const [githubConnected, setGithubConnected] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [analysisRefresh, setAnalysisRefresh] = useState(0);
@@ -144,10 +148,17 @@ function App() {
   useEffect(() => {
     if (!user) return;
     setLoading(true);
-    Promise.all([api("/api/repos"), api("/api/dashboard/summary")])
-      .then(([repoData, summaryData]) => {
-        setRepos(repoData.repositories || []);
+    setError("");
+    Promise.all([api("/api/github/status"), api("/api/dashboard/summary")])
+      .then(async ([githubStatus, summaryData]) => {
+        setGithubConnected(Boolean(githubStatus.connected));
         setSummary(summaryData);
+        if (githubStatus.connected) {
+          const repoData = await api("/api/repos");
+          setRepos(repoData.repositories || []);
+        } else {
+          setRepos([]);
+        }
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
@@ -244,7 +255,7 @@ function App() {
         </div>
         <div className="user-strip">
           {user.avatar_url && <img src={user.avatar_url} alt="" />}
-          <span>{user.username}</span>
+          <span>{user.display_name || user.username}</span>
           <button className="ghost-button" onClick={logout}>Logout</button>
         </div>
       </header>
@@ -272,9 +283,18 @@ function App() {
             <h2>Run Pipeline</h2>
             <p>Choose the exact GitHub Actions workflow to dispatch.</p>
           </div>
+          {!githubConnected && (
+            <div className="connect-panel">
+              <h3>Connect GitHub</h3>
+              <p>Authorize repository and workflow access after Microsoft login.</p>
+              <a className="primary-action" href={`${AUTH_BASE}/api/auth/github`}>
+                Connect GitHub
+              </a>
+            </div>
+          )}
           <label>
             Repository
-            <select value={selectedRepoId} onChange={(event) => setSelectedRepoId(event.target.value)}>
+            <select value={selectedRepoId} onChange={(event) => setSelectedRepoId(event.target.value)} disabled={!githubConnected}>
               <option value="">Select repository</option>
               {repos.map((repo) => (
                 <option key={repo.id} value={repo.id}>{repo.full_name}</option>
@@ -379,7 +399,7 @@ function App() {
           {currentRun?.conclusion === "failure" && !analysis?.failure_reason && (
             <div className="analysis pending">
               <h2>Failure Analysis</h2>
-              <p>PipelineIQ detected the failed run. Gemini is preparing the failure cause and suggested fix.</p>
+              <p>PipelineIQ detected the failed run. The AI service is preparing the failure cause and suggested fix.</p>
               {analysis?.category && (
                 <dl className="details compact">
                   <div><dt>Failed Job</dt><dd>{analysis.failed_job || "Unknown"}</dd></div>

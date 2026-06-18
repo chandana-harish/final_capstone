@@ -43,6 +43,18 @@ app.get("/api/repos", requireUser, asyncHandler(async (req, res) => {
   res.json(data);
 }));
 
+app.get("/api/github/status", requireUser, asyncHandler(async (req, res) => {
+  const result = await query(
+    "SELECT updated_at, scopes FROM github_accounts WHERE user_id = $1 LIMIT 1",
+    [req.user.sub]
+  );
+  res.json({
+    connected: Boolean(result.rows[0]),
+    updatedAt: result.rows[0]?.updated_at || null,
+    scopes: result.rows[0]?.scopes || ""
+  });
+}));
+
 app.get("/api/repos/:owner/:repo/workflows", requireUser, asyncHandler(async (req, res) => {
   const data = await serviceJson(`${githubServiceUrl}/internal/users/${req.user.sub}/repos/${req.params.owner}/${req.params.repo}/workflows`);
   res.json(data);

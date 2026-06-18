@@ -203,19 +203,26 @@ app.get("/api/auth/github/callback", asyncHandler(async (req, res) => {
     if (!sessionUser) {
       return res.status(401).json({ error: "Login with Microsoft Entra ID before connecting GitHub" });
     }
+    await query(
+      `UPDATE users
+       SET github_user_id = NULL
+       WHERE github_user_id = $1 AND id <> $2`,
+      [profile.id, sessionUser.sub]
+    );
     const userResult = await query(
       `UPDATE users
-       SET github_user_id = $1, avatar_url = $2
-       WHERE id = $3
+       SET github_user_id = $1, username = $2, email = COALESCE(email, $3),
+         avatar_url = $4, last_login_at = NOW()
+       WHERE id = $5
        RETURNING *`,
-      [profile.id, profile.avatar_url, sessionUser.sub]
+      [profile.id, profile.login, primaryEmail, profile.avatar_url, sessionUser.sub]
     );
     user = userResult.rows[0];
   } else {
     const userResult = await query(
       `INSERT INTO users (github_user_id, auth_provider, username, email, avatar_url, last_login_at)
        VALUES ($1, 'github', $2, $3, $4, NOW())
-       ON CONFLICT (github_user_id)
+       ON CONFLICT (github_user_id) WHERE github_user_id IS NOT NULL
        DO UPDATE SET username = EXCLUDED.username, email = EXCLUDED.email,
          avatar_url = EXCLUDED.avatar_url, auth_provider = 'github', last_login_at = NOW()
        RETURNING *`,

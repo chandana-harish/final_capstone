@@ -4,7 +4,7 @@ metadata:
   name: frontend
   namespace: pipelineiq
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: frontend
@@ -44,7 +44,7 @@ metadata:
   name: auth-service
   namespace: pipelineiq
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: auth-service
@@ -73,11 +73,11 @@ spec:
               port: 8081
           resources:
             requests:
-              cpu: 100m
-              memory: 128Mi
+              cpu: 50m
+              memory: 64Mi
             limits:
-              cpu: 500m
-              memory: 512Mi
+              cpu: 250m
+              memory: 256Mi
 ---
 apiVersion: v1
 kind: Service
@@ -97,7 +97,7 @@ metadata:
   name: dashboard-api
   namespace: pipelineiq
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: dashboard-api
@@ -128,6 +128,13 @@ spec:
               port: 8080
             initialDelaySeconds: 30
             periodSeconds: 20
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
 ---
 apiVersion: v1
 kind: Service
@@ -147,7 +154,7 @@ metadata:
   name: github-integration-service
   namespace: pipelineiq
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: github-integration-service
@@ -174,6 +181,13 @@ spec:
             httpGet:
               path: /health
               port: 8082
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
 ---
 apiVersion: v1
 kind: Service
@@ -210,6 +224,13 @@ spec:
                 name: pipelineiq-config
             - secretRef:
                 name: pipelineiq-kv-secrets
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -234,6 +255,13 @@ spec:
                 name: pipelineiq-config
             - secretRef:
                 name: pipelineiq-kv-secrets
+          resources:
+            requests:
+              cpu: 75m
+              memory: 128Mi
+            limits:
+              cpu: 300m
+              memory: 384Mi
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -258,6 +286,13 @@ spec:
                 name: pipelineiq-config
             - secretRef:
                 name: pipelineiq-kv-secrets
+          resources:
+            requests:
+              cpu: 75m
+              memory: 128Mi
+            limits:
+              cpu: 300m
+              memory: 384Mi
           volumeMounts:
             - name: keyvault-secrets
               mountPath: "/mnt/secrets-store"
@@ -276,7 +311,7 @@ metadata:
   name: webhook-service
   namespace: pipelineiq
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: webhook-service
@@ -303,6 +338,13 @@ spec:
             httpGet:
               path: /health
               port: 8087
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
 ---
 apiVersion: v1
 kind: Service
@@ -339,3 +381,10 @@ spec:
                 name: pipelineiq-config
             - secretRef:
                 name: pipelineiq-kv-secrets
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi

@@ -6,9 +6,9 @@ metadata:
 data:
   NODE_ENV: "development"
 
-  FRONTEND_URL: "http://9.223.144.24"
-  PUBLIC_API_BASE_URL: "http://9.223.144.24"
-  PUBLIC_AUTH_BASE_URL: "http://9.223.144.24"
+  FRONTEND_URL: "https://www.aasikdevops.website"
+  PUBLIC_API_BASE_URL: "https://www.aasikdevops.website"
+  PUBLIC_AUTH_BASE_URL: "https://www.aasikdevops.website"
 
   AUTH_SERVICE_URL: "http://auth-service:8081"
   DASHBOARD_API_URL: "http://dashboard-api:8080"
@@ -18,11 +18,11 @@ data:
   GEMINI_SERVICE_URL: "http://gemini-ai-service:8085"
   NOTIFICATION_SERVICE_URL: "http://notification-service:8086"
 
-  GITHUB_CALLBACK_URL: "http://9.223.144.24/api/auth/github/callback"
+  GITHUB_CALLBACK_URL: "https://www.aasikdevops.website/api/auth/github/callback"
   AUTH_PROVIDER: "github"
-  ENTRA_TENANT_ID: "replace-me"
-  ENTRA_CLIENT_ID: "replace-me"
-  ENTRA_CALLBACK_URL: "http://9.223.144.24/api/auth/entra/callback"
+  ENTRA_TENANT_ID: "6206e18c-53ff-46fb-856b-d8435455825a"
+  ENTRA_CLIENT_ID: "df28d127-5dcf-4012-a523-23681010d430"
+  ENTRA_CALLBACK_URL: "https://www.aasikdevops.website/api/auth/entra/callback"
   SESSION_TTL: "8h"
   AI_PROVIDER: "azure-foundry"
   AI_FALLBACK_ENABLED: "true"

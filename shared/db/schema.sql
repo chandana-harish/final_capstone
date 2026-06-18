@@ -2,7 +2,7 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 CREATE TABLE IF NOT EXISTS users (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  github_user_id BIGINT UNIQUE,
+  github_user_id BIGINT,
   entra_user_id TEXT UNIQUE,
   auth_provider TEXT NOT NULL DEFAULT 'github',
   username TEXT NOT NULL,
@@ -12,6 +12,8 @@ CREATE TABLE IF NOT EXISTS users (
   last_login_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+CREATE UNIQUE INDEX IF NOT EXISTS users_github_user_id_idx ON users(github_user_id) WHERE github_user_id IS NOT NULL;
 
 CREATE TABLE IF NOT EXISTS github_accounts (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

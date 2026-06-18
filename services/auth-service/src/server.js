@@ -26,6 +26,20 @@ health(app, "auth-service");
 
 async function ensureSchema() {
   await query("ALTER TABLE users ALTER COLUMN github_user_id DROP NOT NULL");
+  await query("ALTER TABLE users ALTER COLUMN github_user_id DROP DEFAULT");
+  await query(`
+    DO $$
+    BEGIN
+      IF EXISTS (
+        SELECT 1
+        FROM pg_constraint
+        WHERE conname = 'users_github_user_id_key'
+      ) THEN
+        ALTER TABLE users DROP CONSTRAINT users_github_user_id_key;
+      END IF;
+    END $$;
+  `);
+  await query("CREATE UNIQUE INDEX IF NOT EXISTS users_github_user_id_idx ON users(github_user_id) WHERE github_user_id IS NOT NULL");
   await query("ALTER TABLE users ADD COLUMN IF NOT EXISTS entra_user_id TEXT UNIQUE");
   await query("ALTER TABLE users ADD COLUMN IF NOT EXISTS auth_provider TEXT NOT NULL DEFAULT 'github'");
   await query("ALTER TABLE users ADD COLUMN IF NOT EXISTS display_name TEXT");
@@ -121,8 +135,8 @@ app.get("/api/auth/entra/callback", asyncHandler(async (req, res) => {
   const email = claims.preferred_username || claims.email || null;
   const displayName = claims.name || email || "PipelineIQ user";
   const userResult = await query(
-    `INSERT INTO users (entra_user_id, auth_provider, username, display_name, email, last_login_at)
-     VALUES ($1, 'entra', $2, $3, $4, NOW())
+    `INSERT INTO users (github_user_id, entra_user_id, auth_provider, username, display_name, email, last_login_at)
+     VALUES (NULL, $1, 'entra', $2, $3, $4, NOW())
      ON CONFLICT (entra_user_id)
      DO UPDATE SET username = EXCLUDED.username, display_name = EXCLUDED.display_name,
        email = EXCLUDED.email, auth_provider = 'entra', last_login_at = NOW()

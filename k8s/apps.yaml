@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: nimeshsv814/final_capstone-frontend:v1.0.4
+          image: nimeshsv814/final_capstone-frontend:v1.0.5
           ports:
             - containerPort: 80
           resources:
@@ -55,7 +55,7 @@ spec:
     spec:
       containers:
         - name: auth-service
-          image: nimeshsv814/final_capstone-auth-service:latest
+          image: nimeshsv814/final_capstone-auth-service:v1.0.1
           ports:
             - containerPort: 8081
           envFrom:
@@ -108,7 +108,7 @@ spec:
     spec:
       containers:
         - name: dashboard-api
-          image: nimeshsv814/final_capstone-dashboard-api:v1.0.0
+          image: nimeshsv814/final_capstone-dashboard-api:v1.0.1
           ports:
             - containerPort: 8080
           envFrom:

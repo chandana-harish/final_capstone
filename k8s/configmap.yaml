@@ -33,5 +33,5 @@ data:
   AZURE_OPENAI_API_VERSION: "2024-10-21"
   QUEUE_PROVIDER: "servicebus"
   RABBITMQ_URL: "amqp://rabbitmq:5672"
-  SERVICEBUS_NAMESPACE: "namespacecentral.servicebus.windows.net"
+  SERVICEBUS_NAMESPACE: "servicebusnewch.servicebus.windows.net"
   SMTP_PORT: "587"

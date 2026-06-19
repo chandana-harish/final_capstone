@@ -20,8 +20,8 @@ data:
 
   GITHUB_CALLBACK_URL: "https://www.aasikdevops.website/api/auth/github/callback"
   AUTH_PROVIDER: "entra"
-  ENTRA_TENANT_ID: "6206e18c-53ff-46fb-856b-d8435455825a"
-  ENTRA_CLIENT_ID: "df28d127-5dcf-4012-a523-23681010d430"
+  ENTRA_TENANT_ID: "cc0cfe21-42ac-437c-a9e2-c269833239e1"
+  ENTRA_CLIENT_ID: "bd369e65-bd67-4150-b628-ee1925cec78f"
   ENTRA_CALLBACK_URL: "https://www.aasikdevops.website/api/auth/entra/callback"
   SESSION_TTL: "8h"
   AI_PROVIDER: "azure-foundry"

@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: nimeshsv814/final_capstone-frontend:v1.0.8
+          image: nimeshsv814/final_capstone-frontend:v1.0.9
           ports:
             - containerPort: 8080
           securityContext:

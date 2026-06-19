@@ -31,5 +31,7 @@ data:
   AZURE_OPENAI_ENDPOINT: "https://chandana.services.ai.azure.com"
   AZURE_OPENAI_DEPLOYMENT: "gpt-4o-mini"
   AZURE_OPENAI_API_VERSION: "2024-10-21"
+  QUEUE_PROVIDER: "rabbitmq"
   RABBITMQ_URL: "amqp://rabbitmq:5672"
+  SERVICEBUS_NAMESPACE: "replace-me.servicebus.windows.net"
   SMTP_PORT: "587"

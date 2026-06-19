@@ -63,7 +63,7 @@ spec:
     spec:
       containers:
         - name: auth-service
-          image: nimeshsv814/final_capstone-auth-service:v1.0.6
+          image: nimeshsv814/final_capstone-auth-service:v1.0.7
           ports:
             - containerPort: 8081
           securityContext:
@@ -124,7 +124,7 @@ spec:
     spec:
       containers:
         - name: dashboard-api
-          image: nimeshsv814/final_capstone-dashboard-api:v1.0.3
+          image: nimeshsv814/final_capstone-dashboard-api:v1.0.4
           ports:
             - containerPort: 8080
           securityContext:
@@ -189,7 +189,7 @@ spec:
     spec:
       containers:
         - name: github-integration-service
-          image: nimeshsv814/final_capstone-github-integration-service:v1.0.2
+          image: nimeshsv814/final_capstone-github-integration-service:v1.0.3
           ports:
             - containerPort: 8082
           securityContext:
@@ -250,7 +250,7 @@ spec:
     spec:
       containers:
         - name: pipeline-runner-service
-          image: nimeshsv814/final_capstone-pipeline-runner-service:v1.0.2
+          image: nimeshsv814/final_capstone-pipeline-runner-service:v1.0.3
           securityContext:
             runAsNonRoot: true
             runAsUser: 1000
@@ -289,7 +289,7 @@ spec:
     spec:
       containers:
         - name: workflow-analyzer-service
-          image: nimeshsv814/final_capstone-workflow-analyzer-service:v1.0.2
+          image: nimeshsv814/final_capstone-workflow-analyzer-service:v1.0.3
           securityContext:
             runAsNonRoot: true
             runAsUser: 1000
@@ -328,7 +328,7 @@ spec:
     spec:
       containers:
         - name: gemini-ai-service
-          image: nimeshsv814/final_capstone-gemini-ai-service:v1.0.3
+          image: nimeshsv814/final_capstone-gemini-ai-service:v1.0.4
           securityContext:
             runAsNonRoot: true
             runAsUser: 1000
@@ -378,7 +378,7 @@ spec:
     spec:
       containers:
         - name: webhook-service
-          image: nimeshsv814/final_capstone-webhook-service:v1.0.2
+          image: nimeshsv814/final_capstone-webhook-service:v1.0.3
           ports:
             - containerPort: 8087
           securityContext:
@@ -439,7 +439,7 @@ spec:
     spec:
       containers:
         - name: notification-service
-          image: nimeshsv814/final_capstone-notification-service:v1.0.2
+          image: nimeshsv814/final_capstone-notification-service:v1.0.3
           securityContext:
             runAsNonRoot: true
             runAsUser: 1000

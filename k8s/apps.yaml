@@ -440,7 +440,7 @@ spec:
     spec:
       containers:
         - name: notification-service
-          image: nimeshsv814/final_capstone-notification-service:v1.0.5
+          image: nimeshsv814/final_capstone-notification-service:v1.0.6
           securityContext:
             runAsNonRoot: true
             runAsUser: 1000

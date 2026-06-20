@@ -9,7 +9,7 @@ ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
 ENV VITE_AUTH_BASE_URL=$VITE_AUTH_BASE_URL
 RUN npm run build
 
-FROM nginx:stable-alpine3.22
+FROM nginx:1.29-alpine
 RUN mkdir -p /tmp/client_temp /tmp/proxy_temp /tmp/fastcgi_temp /tmp/uwsgi_temp /tmp/scgi_temp \
     && chown -R nginx:nginx /tmp /var/cache/nginx /var/log/nginx /usr/share/nginx/html
 COPY frontend/nginx-main.conf /etc/nginx/nginx.conf
